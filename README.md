@@ -1,18 +1,19 @@
 <div align="center">
   <img src="public/quill-ink-512.png" alt="AO3 Toys" width="96" height="96" />
 
-  # AO3 Toys
+# AO3 Toys
 
-  A refined reading experience for [Archive of Our Own](https://archiveofourown.org).
+A refined reading experience for [Archive of Our Own](https://archiveofourown.org).
 
-  [![Build](https://github.com/Eden7600/ao3-toys/actions/workflows/build.yml/badge.svg)](https://github.com/Eden7600/ao3-toys/actions/workflows/build.yml)
-  [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
-  [![Latest release](https://img.shields.io/github/v/release/Eden7600/ao3-toys)](https://github.com/Eden7600/ao3-toys/releases/latest)
+[![Build](https://github.com/Eden7600/ao3-toys/actions/workflows/build.yml/badge.svg)](https://github.com/Eden7600/ao3-toys/actions/workflows/build.yml)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/Eden7600/ao3-toys)](https://github.com/Eden7600/ao3-toys/releases/latest)
+
 </div>
 
 ---
 
-AO3 Toys is a browser extension (Chrome and Firefox) that adds tag highlighting, work filtering, theming, and a better reading view on top of AO3 — entirely client-side. Nothing you configure ever leaves your browser.
+AO3 Toys is a browser extension (Chrome and Firefox) that adds tag highlighting, work filtering, theming, and a better reading view on top of AO3.
 
 ## Features
 
@@ -26,7 +27,7 @@ AO3 Toys is a browser extension (Chrome and Firefox) that adds tag highlighting,
 - **Quick Toggles** — The toolbar popup gives you quick switches for the big features, perfect for turning all hiding off for a browse and back on afterwards.
 - **Import / Export** — Back up your tags and settings, or move them to another browser, since everything lives locally.
 
-Works on `archiveofourown.org` and its known mirrors/aliases.
+Works on `archiveofourown.org` and its known mirrors/aliases. Know another site running [otwarchive](https://github.com/otwcode/otwarchive) (the software AO3 is built on) that should be supported? Open a PR to add its domain — see [Contributing](#contributing).
 
 ## Installation
 
@@ -72,15 +73,15 @@ pnpm install
 
 ### Common scripts
 
-| Command | Description |
-| --- | --- |
-| `pnpm build:dev:chrome` | Build an unpacked dev build for Chrome into `dist/chrome` |
+| Command                  | Description                                                 |
+| ------------------------ | ----------------------------------------------------------- |
+| `pnpm build:dev:chrome`  | Build an unpacked dev build for Chrome into `dist/chrome`   |
 | `pnpm build:dev:firefox` | Build an unpacked dev build for Firefox into `dist/firefox` |
-| `pnpm build:dev` | Build dev builds for both browsers |
-| `pnpm build` | Build production builds for both browsers |
-| `pnpm test` | Run the unit test suite (Vitest) |
-| `pnpm types` | Type-check the project (`tsc --noEmit`) |
-| `pnpm lint` | Lint the project (ESLint) |
+| `pnpm build:dev`         | Build dev builds for both browsers                          |
+| `pnpm build`             | Build production builds for both browsers                   |
+| `pnpm test`              | Run the unit test suite (Vitest)                            |
+| `pnpm types`             | Type-check the project (`tsc --noEmit`)                     |
+| `pnpm lint`              | Lint the project (ESLint)                                   |
 
 After building, load the appropriate `dist/<browser>` folder as an unpacked/temporary extension using the same steps as [Installation](#installation), pointed at your local build instead of a downloaded release. Rebuild and reload the extension after each change — there's no hot reload for the extension itself.
 
