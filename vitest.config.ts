@@ -11,6 +11,7 @@ export default defineConfig({
   },
   test: {
     environment: "happy-dom",
+    css: true,
     // Tests live outside src/ because content scripts are auto-registered
     // from src/content/scripts via import.meta.glob
     include: ["tests/**/*.test.ts"],

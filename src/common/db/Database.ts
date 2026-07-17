@@ -35,9 +35,7 @@ class Database extends Dexie {
           .table("regexTags")
           .toCollection()
           .modify((tag: RegexTag) => {
-            if (tag.caseInsensitive === undefined) {
-              tag.caseInsensitive = false;
-            }
+            tag.caseInsensitive ??= false;
           });
       });
 

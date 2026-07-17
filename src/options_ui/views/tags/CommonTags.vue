@@ -10,7 +10,7 @@ import ConfirmDialog from "primevue/confirmdialog";
 import ContextMenu from "primevue/contextmenu";
 import DataTable from "primevue/datatable";
 import Dialog from "primevue/dialog";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import Toast from "primevue/toast";
@@ -375,7 +375,7 @@ const resetFilters = () => {
             ></div>
           </div>
           <div class="flex-grow w-full">
-            <Dropdown
+            <Select
               :pt="{ id: 'color' }"
               v-model="editedTag.color"
               :options="colors"
@@ -433,7 +433,7 @@ const resetFilters = () => {
             ></div>
           </div>
           <div class="flex-grow w-full">
-            <Dropdown
+            <Select
               v-model="newTag.color"
               :options="colors"
               class="w-full"

@@ -7,15 +7,15 @@ const logger = new Logger("BG-Subscription");
 export class SubscriptionHandler {
   async checkIdsAgainstSubscriptions(ids: number[]): Promise<Subscription[]> {
     try {
-      ids = ids.map((id) => Number(id));
-
       return await db.subscriptions
         .where("id")
         .anyOf(...ids)
         .toArray();
     } catch (error) {
       logger.error("Error in checkIdsAgainstSubscriptions:", error);
-      throw new Error("Failed to check IDs against subscriptions");
+      throw new Error("Failed to check IDs against subscriptions", {
+        cause: error,
+      });
     }
   }
 
@@ -26,7 +26,9 @@ export class SubscriptionHandler {
       });
     } catch (error) {
       logger.error("Error in scrapeSubscriptionsPage:", error);
-      throw new Error("Failed to scrape and update subscriptions");
+      throw new Error("Failed to scrape and update subscriptions", {
+        cause: error,
+      });
     }
   }
 
@@ -37,7 +39,9 @@ export class SubscriptionHandler {
       });
     } catch (error) {
       logger.error("Error in addSingleSubscription:", error);
-      throw new Error("Failed to add a single subscription");
+      throw new Error("Failed to add a single subscription", {
+        cause: error,
+      });
     }
   }
 
@@ -48,7 +52,9 @@ export class SubscriptionHandler {
       });
     } catch (error) {
       logger.error("Error in removeSingleSubscription:", error);
-      throw new Error("Failed to remove the subscription");
+      throw new Error("Failed to remove the subscription", {
+        cause: error,
+      });
     }
   }
 
@@ -57,7 +63,9 @@ export class SubscriptionHandler {
       return await db.subscriptions.toArray();
     } catch (error) {
       logger.error("Error in fetchAllSubscriptions:", error);
-      throw new Error("Failed to fetch all subscriptions");
+      throw new Error("Failed to fetch all subscriptions", {
+        cause: error,
+      });
     }
   }
 }

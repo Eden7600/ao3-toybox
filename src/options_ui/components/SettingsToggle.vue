@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import InputSwitch from "primevue/inputswitch";
+import ToggleSwitch from "primevue/toggleswitch";
 
 interface Props {
   modelValue: boolean;
@@ -42,7 +42,7 @@ const toggleId = computed(() => `toggle-${props.label.toLowerCase().replace(/\s+
         {{ description }}
       </p>
     </div>
-    <InputSwitch
+    <ToggleSwitch
       :id="toggleId"
       v-model="model"
       :disabled="disabled"

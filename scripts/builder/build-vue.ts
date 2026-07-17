@@ -22,9 +22,6 @@ export async function buildVue(args: Args, entry: string, outPath: string) {
     build: {
       sourcemap: isDev ? "inline" : false,
       minify: !isDev,
-      terserOptions: {
-        mangle: false,
-      },
       outDir: resolve(process.cwd(), `dist/${args.browser}/${outPath}`),
       emptyOutDir: false,
       rollupOptions: {
