@@ -4,13 +4,6 @@
   "version": "3.1.0",
   "private": true,
   "author": "Eden7600",
-  "imports": {
-    "#dom": "./src/common/dom.ts",
-    "#common": "./src/common/index.ts",
-    "#img/*": "./src/img/*",
-    "#icons/*": "./src/icons/*",
-    "#content_script/*": "./src/content_script/*"
-  },
   "scripts": {
     "build": "npm run build:prod:firefox && npm run build:prod:chrome",
     "build:dev": "npm run build:dev:firefox && npm run build:dev:chrome",
