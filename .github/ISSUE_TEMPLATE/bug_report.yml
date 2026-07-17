@@ -5,12 +5,12 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug! Please check [existing issues](https://github.com/Eden7600/ao3-toys/issues) first to avoid duplicates.
+        Thanks for taking the time to report a bug! Please check [existing issues](https://github.com/Eden7600/ao3-toybox/issues) first to avoid duplicates.
 
   - type: input
     id: version
     attributes:
-      label: AO3 Toys version
+      label: AO3 Toybox version
       description: Found on the Welcome page of the extension's options, or in the extension's details page in your browser.
       placeholder: e.g. 3.1.0
     validations:

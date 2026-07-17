@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-AO3 Toys is licensed under the [GNU Affero General Public License v3.0](LICENSE). This file lists third-party work incorporated into or that inspired the project, and any licensing terms that apply on top of the project's own license.
+AO3 Toybox is licensed under the [GNU Affero General Public License v3.0](LICENSE). This file lists third-party work incorporated into or that inspired the project, and any licensing terms that apply on top of the project's own license.
 
 ## ReversiPlusPlus (theme)
 

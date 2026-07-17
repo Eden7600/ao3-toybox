@@ -1,11 +1,11 @@
-# Contributing to AO3 Toys
+# Contributing to AO3 Toybox
 
 Thanks for taking the time to contribute! This document covers how to set up your environment, the workflow for submitting changes, and the conventions the project follows.
 
 ## Before you start
 
 - For anything more than a small fix, please open an issue first to discuss the change. This avoids wasted work if the approach needs adjusting or if something similar is already in progress.
-- For bugs, check the [existing issues](https://github.com/Eden7600/ao3-toys/issues) before filing a new one.
+- For bugs, check the [existing issues](https://github.com/Eden7600/ao3-toybox/issues) before filing a new one.
 
 ## Development setup
 
@@ -18,8 +18,8 @@ Thanks for taking the time to contribute! This document covers how to set up you
 2. Fork the repository, then clone your fork:
 
    ```sh
-   git clone https://github.com/<your-username>/ao3-toys.git
-   cd ao3-toys
+   git clone https://github.com/<your-username>/ao3-toybox.git
+   cd ao3-toybox
    pnpm install
    ```
 

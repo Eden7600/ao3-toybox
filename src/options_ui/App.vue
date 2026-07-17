@@ -87,7 +87,7 @@ router.afterEach(() => {
       >
         <Menu class="w-5 h-5" aria-hidden="true" />
       </button>
-      <h1 class="text-lg font-bold dark:text-white">AO3 Toys</h1>
+      <h1 class="text-lg font-bold dark:text-white">AO3 Toybox</h1>
     </header>
 
     <!-- Drawer backdrop (mobile only) -->

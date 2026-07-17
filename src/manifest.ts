@@ -15,8 +15,8 @@ export default function (): PartialDeep<browser._manifest.WebExtensionManifest> 
 
   return {
     manifest_version: 3,
-    name: "AO3 Toys",
-    short_name: "AO3 Toys",
+    name: "AO3 Toybox",
+    short_name: "AO3 Toybox",
     description: "A refined reading experience for AO3",
     author: "Eden7600",
     version: packageJson.version,
@@ -75,7 +75,7 @@ export default function (): PartialDeep<browser._manifest.WebExtensionManifest> 
       browser_specific_settings: {
         gecko: {
           // Needed for proper storage
-          id: "ao3-toys@eden7600",
+          id: "ao3-toybox@eden7600",
           // CSS nesting is only supported in FF117+
           strict_min_version: "117.0",
           // Everything stays in the browser, so: none.

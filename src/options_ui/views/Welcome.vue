@@ -99,7 +99,7 @@ const features: FeatureCard[] = [
   <!-- Hero -->
   <div class="p-5 md:p-8 bg-surface-900 rounded-lg">
     <div class="flex items-center gap-3">
-      <h1 class="text-4xl font-bold text-white">AO3 Toys</h1>
+      <h1 class="text-4xl font-bold text-white">AO3 Toybox</h1>
       <span v-if="version" class="text-sm text-gray-500 mt-2"
         >v{{ version }}</span
       >

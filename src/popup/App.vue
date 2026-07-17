@@ -12,7 +12,7 @@ type Screen = "home" | "filters" | "theme";
 const screen = ref<Screen>("home");
 
 const screenTitles: Record<Screen, string> = {
-  home: "AO3 Toys",
+  home: "AO3 Toybox",
   filters: "Hide Filters",
   theme: "Theme",
 };

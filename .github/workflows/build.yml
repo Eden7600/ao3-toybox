@@ -42,7 +42,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
-          name: ao3-toys-${{ matrix.browser }}-${{ matrix.mode }}
+          name: ao3-toybox-${{ matrix.browser }}-${{ matrix.mode }}
           path: dist/${{ matrix.browser }}
           if-no-files-found: error
           retention-days: 14
@@ -59,12 +59,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: ao3-toys-chrome-prod
+          name: ao3-toybox-chrome-prod
           path: dist/chrome
 
       - uses: actions/download-artifact@v8
         with:
-          name: ao3-toys-firefox-prod
+          name: ao3-toybox-firefox-prod
           path: dist/firefox
 
       - name: Read declared version
@@ -85,12 +85,12 @@ jobs:
             echo "Release $tag already exists; skipping."
             exit 0
           fi
-          (cd dist/chrome && zip -r "../ao3-toys-chrome-$tag.zip" .)
-          (cd dist/firefox && zip -r "../ao3-toys-firefox-$tag.zip" .)
+          (cd dist/chrome && zip -r "../ao3-toybox-chrome-$tag.zip" .)
+          (cd dist/firefox && zip -r "../ao3-toybox-firefox-$tag.zip" .)
           gh release create "$tag" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "AO3 Toys $tag" \
+            --title "AO3 Toybox $tag" \
             --generate-notes \
-            dist/ao3-toys-chrome-"$tag".zip \
-            dist/ao3-toys-firefox-"$tag".zip
+            dist/ao3-toybox-chrome-"$tag".zip \
+            dist/ao3-toybox-firefox-"$tag".zip

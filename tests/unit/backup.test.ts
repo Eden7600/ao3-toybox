@@ -25,7 +25,7 @@ describe("buildBackup / parseBackup round-trip", () => {
     );
     const parsed = JSON.parse(json) as Record<string, unknown>;
 
-    expect(parsed.format).toBe("ao3-toys-backup");
+    expect(parsed.format).toBe("ao3-toybox-backup");
     expect(parsed.version).toBe(1);
     expect(parsed.exportedAt).toBe(NOW);
 
@@ -39,7 +39,7 @@ describe("buildBackup / parseBackup round-trip", () => {
 
   it("names the file by date", () => {
     expect(backupFilename(new Date(NOW))).toBe(
-      "ao3-toys-backup-2026-07-11.json",
+      "ao3-toybox-backup-2026-07-11.json",
     );
   });
 });
@@ -92,7 +92,7 @@ describe("parseBackup", () => {
   it("warns on newer backup versions but still imports", () => {
     const { sections, warnings } = parseBackup(
       JSON.stringify({
-        format: "ao3-toys-backup",
+        format: "ao3-toybox-backup",
         version: 99,
         data: { commonTags: [{ name: "x" }] },
       }),

@@ -338,8 +338,8 @@ const WorkToolbarUI = ({
 
   return (
     <div class="rt-toolbar">
-      <span class="rt-toolbar-brand" title="AO3 Toys work toolbar">
-        Toys
+      <span class="rt-toolbar-brand" title="AO3 Toybox work toolbar">
+        Toybox
       </span>
       {nativeActions.map((action) => (
         <NativeActionButton

@@ -1,4 +1,4 @@
-This file contains the license that applies to the AO3 Toys dark theme
+This file contains the license that applies to the AO3 Toybox dark theme
 (src/ao3_theme_injector/theme/ and src/ao3_theme_injector/theme-profiles/),
 which is adapted from ReversiPlusPlus by galaxygrotesque:
 https://github.com/galaxygrotesque/ReversiPlusPlus

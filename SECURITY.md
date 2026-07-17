@@ -2,13 +2,13 @@
 
 ## Supported Versions
 
-Only the latest release of AO3 Toys is supported with security fixes. Please make sure you're on the [latest release](https://github.com/Eden7600/ao3-toys/releases/latest) before reporting an issue.
+Only the latest release of AO3 Toybox is supported with security fixes. Please make sure you're on the [latest release](https://github.com/Eden7600/ao3-toybox/releases/latest) before reporting an issue.
 
 ## Reporting a Vulnerability
 
-If you find a security vulnerability in AO3 Toys, please report it privately rather than opening a public issue:
+If you find a security vulnerability in AO3 Toybox, please report it privately rather than opening a public issue:
 
-- Preferred: use [GitHub's private vulnerability reporting](https://github.com/Eden7600/ao3-toys/security/advisories/new) for this repository.
+- Preferred: use [GitHub's private vulnerability reporting](https://github.com/Eden7600/ao3-toybox/security/advisories/new) for this repository.
 - Alternatively, email **eden7600@pm.me** with details.
 
 Please include:
@@ -23,7 +23,7 @@ Please do not disclose the issue publicly until a fix has been released.
 
 ## Scope
 
-AO3 Toys runs entirely client-side: it reads and modifies pages on AO3 domains and stores settings locally in browser storage. It does not run a server and does not transmit data anywhere. Reports most relevant to this project involve things like:
+AO3 Toybox runs entirely client-side: it reads and modifies pages on AO3 domains and stores settings locally in browser storage. It does not run a server and does not transmit data anywhere. Reports most relevant to this project involve things like:
 
 - Content injected onto AO3 pages that could be exploited (e.g. XSS via crafted tag/work content)
 - Extension permissions being broader than necessary

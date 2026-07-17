@@ -9,8 +9,8 @@ import type { WorkStatusRow } from "@src/common/work-status";
 // import files (current envelope AND the original flat shape), and planning
 // merge-safe imports. The Export view owns the actual Dexie/storage calls.
 
-export const BACKUP_FORMAT = "ao3-toys-backup";
-// Written by exports before the rename to AO3 Toys; still accepted on import.
+export const BACKUP_FORMAT = "ao3-toybox-backup";
+// Written by exports before the rename to AO3 Toybox; still accepted on import.
 const LEGACY_BACKUP_FORMAT = "readers-toybox-backup";
 export const BACKUP_VERSION = 1;
 
@@ -48,7 +48,7 @@ export function buildBackup(
 }
 
 export function backupFilename(date: Date): string {
-  return `ao3-toys-backup-${date.toISOString().split("T")[0]}.json`;
+  return `ao3-toybox-backup-${date.toISOString().split("T")[0]}.json`;
 }
 
 export type ParsedBackup = {

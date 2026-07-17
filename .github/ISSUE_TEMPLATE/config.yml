@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/Eden7600/ao3-toys/security/advisories/new
+    url: https://github.com/Eden7600/ao3-toybox/security/advisories/new
     about: Please report security vulnerabilities privately instead of opening a public issue — see SECURITY.md.

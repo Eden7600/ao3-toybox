@@ -1,7 +1,7 @@
 {
-  "name": "ao3-toys",
+  "name": "ao3-toybox",
   "type": "module",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "private": true,
   "author": "Eden7600",
   "scripts": {

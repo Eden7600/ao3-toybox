@@ -1,11 +1,11 @@
 name: Feature request
-description: Suggest an idea or improvement for AO3 Toys
+description: Suggest an idea or improvement for AO3 Toybox
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the suggestion! Please check [existing issues](https://github.com/Eden7600/ao3-toys/issues) first to see if it's already been requested.
+        Thanks for the suggestion! Please check [existing issues](https://github.com/Eden7600/ao3-toybox/issues) first to see if it's already been requested.
 
   - type: textarea
     id: problem
@@ -20,7 +20,7 @@ body:
     id: solution
     attributes:
       label: Describe the solution you'd like
-      description: What would you like AO3 Toys to do?
+      description: What would you like AO3 Toybox to do?
     validations:
       required: true
 

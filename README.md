@@ -1,19 +1,19 @@
 <div align="center">
-  <img src="public/quill-ink-512.png" alt="AO3 Toys" width="96" height="96" />
+  <img src="public/quill-ink-512.png" alt="AO3 Toybox" width="96" height="96" />
 
-# AO3 Toys
+# AO3 Toybox
 
 A refined reading experience for [Archive of Our Own](https://archiveofourown.org).
 
-[![Build](https://github.com/Eden7600/ao3-toys/actions/workflows/build.yml/badge.svg)](https://github.com/Eden7600/ao3-toys/actions/workflows/build.yml)
+[![Build](https://github.com/Eden7600/ao3-toybox/actions/workflows/build.yml/badge.svg)](https://github.com/Eden7600/ao3-toybox/actions/workflows/build.yml)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
-[![Latest release](https://img.shields.io/github/v/release/Eden7600/ao3-toys)](https://github.com/Eden7600/ao3-toys/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/Eden7600/ao3-toybox)](https://github.com/Eden7600/ao3-toybox/releases/latest)
 
 </div>
 
 ---
 
-AO3 Toys is a browser extension (Chrome and Firefox) that adds tag highlighting, work filtering, theming, and a better reading view on top of AO3.
+AO3 Toybox is a browser extension (Chrome and Firefox) that adds tag highlighting, work filtering, theming, and a better reading view on top of AO3.
 
 ## Features
 
@@ -31,11 +31,11 @@ Works on `archiveofourown.org` and its known mirrors/aliases. Know another site 
 
 ## Installation
 
-AO3 Toys isn't on the Chrome Web Store or Firefox Add-ons yet, so for now it's installed from the [Releases page](https://github.com/Eden7600/ao3-toys/releases/latest), which has a ready-to-use build for each browser.
+AO3 Toybox isn't on the Chrome Web Store or Firefox Add-ons yet, so for now it's installed from the [Releases page](https://github.com/Eden7600/ao3-toybox/releases/latest), which has a ready-to-use build for each browser.
 
 ### Chrome, Edge, Brave, and other Chromium browsers
 
-1. Download `ao3-toys-chrome-vX.Y.Z.zip` from the [latest release](https://github.com/Eden7600/ao3-toys/releases/latest) and unzip it somewhere you'll keep it (deleting the folder later disables the extension).
+1. Download `ao3-toybox-chrome-vX.Y.Z.zip` from the [latest release](https://github.com/Eden7600/ao3-toybox/releases/latest) and unzip it somewhere you'll keep it (deleting the folder later disables the extension).
 2. Go to `chrome://extensions` (or your browser's equivalent extensions page).
 3. Turn on **Developer mode** (top right).
 4. Click **Load unpacked** and select the unzipped folder.
@@ -46,7 +46,7 @@ The extension updates when you repeat these steps with a newer release; it won't
 
 Firefox only runs unsigned extensions permanently in Nightly/Developer Edition with signature checks disabled, so the straightforward path is a temporary install (reloaded each time Firefox restarts):
 
-1. Download `ao3-toys-firefox-vX.Y.Z.zip` from the [latest release](https://github.com/Eden7600/ao3-toys/releases/latest) and unzip it.
+1. Download `ao3-toybox-firefox-vX.Y.Z.zip` from the [latest release](https://github.com/Eden7600/ao3-toybox/releases/latest) and unzip it.
 2. Go to `about:debugging#/runtime/this-firefox`.
 3. Click **Load Temporary Add-on…** and select the `manifest.json` inside the unzipped folder.
 
@@ -66,8 +66,8 @@ See [Development](#development) below to build from source instead.
 ### Setup
 
 ```sh
-git clone https://github.com/Eden7600/ao3-toys.git
-cd ao3-toys
+git clone https://github.com/Eden7600/ao3-toybox.git
+cd ao3-toybox
 pnpm install
 ```
 
@@ -99,7 +99,7 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for ho
 
 ## Privacy
 
-AO3 Toys does not collect, transmit, or sell any data. All settings, tags, and reading history are stored locally in your browser via extension storage. The `Import / Export` screen lets you back up or move that data yourself.
+AO3 Toybox does not collect, transmit, or sell any data. All settings, tags, and reading history are stored locally in your browser via extension storage. The `Import / Export` screen lets you back up or move that data yourself.
 
 ## Acknowledgements
 
@@ -110,4 +110,4 @@ See [NOTICE.md](NOTICE.md) for full third-party attribution and licensing detail
 
 ## License
 
-AO3 Toys is licensed under the [GNU Affero General Public License v3.0](LICENSE), with the exception of the theme files adapted from ReversiPlusPlus, which remain under GPL-2.0 — see [NOTICE.md](NOTICE.md).
+AO3 Toybox is licensed under the [GNU Affero General Public License v3.0](LICENSE), with the exception of the theme files adapted from ReversiPlusPlus, which remain under GPL-2.0 — see [NOTICE.md](NOTICE.md).
