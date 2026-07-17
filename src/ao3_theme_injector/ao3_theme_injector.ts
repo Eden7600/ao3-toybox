@@ -1,13 +1,15 @@
-import { getSetting } from "@src/common/settings";
+import {
+  getAllSettings,
+  normalizeStoredSettings,
+  type StoredSettings,
+} from "@src/common/settings";
 import { prepareCss } from "./prepare-css";
+import { sameThemeOptions, themeCssOptions } from "./theme-options";
 
 async function runThemeInjector() {
-  const enableTheme = await getSetting("ao3ThemeEnabled");
-  const enableOled = await getSetting("ao3ThemeOled");
-  const themeFamily = await getSetting("ao3ThemeFamily");
-  const themeAccent = await getSetting("ao3ThemeAccent");
-  const themeFlavor = await getSetting("ao3ThemeFlavor");
-  const themeCatppuccinAccent = await getSetting("ao3ThemeCatppuccinAccent");
+  // Mutable: the storage listener below swaps this when theme settings
+  // change, so createNode always renders the latest options.
+  let options = themeCssOptions(await getAllSettings());
 
   // It may be a bit Cargo Cult-y, but I'm replicating some of the logic from DarkReader's
   // theme injector. their dark wizardry is a bit beyond me, but their methodology seems
@@ -19,14 +21,7 @@ async function runThemeInjector() {
   const createNode = (target: HTMLElement) => {
     const styleTag = document.createElement("style");
     styleTag.id = "toybox-theme-injector-style";
-    styleTag.textContent = prepareCss({
-      enableTheme,
-      enableOled,
-      family: themeFamily,
-      accent: themeAccent,
-      flavor: themeFlavor,
-      catppuccinAccent: themeCatppuccinAccent,
-    });
+    styleTag.textContent = prepareCss(options);
     target.appendChild(styleTag);
   };
 
@@ -104,6 +99,34 @@ async function runThemeInjector() {
       observer.observe(document, { childList: true, subtree: true });
     }
   }
+
+  // Live updates: theme changes made in the popup or options page land in
+  // storage; re-render the injected stylesheet in place so open tabs
+  // restyle without a reload.
+  const api = typeof chrome === "undefined" ? browser : chrome;
+
+  api.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "local" || !("settings" in changes)) return;
+
+    const next = themeCssOptions(
+      normalizeStoredSettings(
+        changes.settings.newValue as StoredSettings | null,
+      ),
+    );
+
+    if (sameThemeOptions(options, next)) return;
+
+    options = next;
+
+    const node = selectNode();
+
+    if (node) {
+      node.textContent = prepareCss(options);
+    } else {
+      // Storage events only fire on a live page, so body exists by now
+      createNode(selectTarget());
+    }
+  });
 }
 
 void runThemeInjector();

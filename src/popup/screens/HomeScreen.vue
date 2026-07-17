@@ -166,8 +166,9 @@ const serverConnected = computed(() =>
   <!-- Apply hint -->
   <div class="px-4 py-2.5 border-t border-surface-800">
     <span class="text-[11px] text-gray-500 leading-snug">
-      Changes reload this tab automatically — other AO3 tabs apply them on
-      their next reload
+      Theme changes apply to open tabs instantly. Other changes reload this
+      tab automatically — background AO3 tabs pick them up on their next
+      reload
     </span>
   </div>
 

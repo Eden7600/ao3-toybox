@@ -1,4 +1,5 @@
 /// <reference types="chrome" />
+import { isThemeOnlyPatch } from "@src/ao3_theme_injector/theme-options";
 import {
   getAllSettings,
   setSetting,
@@ -109,7 +110,11 @@ export function usePopupSettings(): PopupSettings {
         ),
       );
 
-      scheduleReload();
+      // Theme settings hot-apply everywhere: the injector in each open
+      // tab watches storage and swaps its stylesheet — no reload needed.
+      if (!isThemeOnlyPatch(patch)) {
+        scheduleReload();
+      }
     } catch (error) {
       console.error("Failed to save settings", error);
       settings.value = previous;
