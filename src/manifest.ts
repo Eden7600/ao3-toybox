@@ -76,13 +76,13 @@ export default function (): PartialDeep<browser._manifest.WebExtensionManifest> 
         gecko: {
           // Needed for proper storage
           id: "ao3-toybox@eden7600",
-          // data_collection_permissions requires FF140+ (CSS nesting needs 117+)
+          // The data_collection_permissions key requires FF140+ (CSS nesting needs 117+)
           strict_min_version: "140.0",
           // Everything stays in the browser, so: none.
           data_collection_permissions: { required: ["none"] },
         } satisfies GeckoSettings,
         gecko_android: {
-          // data_collection_permissions requires Android FF142+
+          // The data_collection_permissions key requires Android FF142+
           strict_min_version: "142.0",
         },
       },
