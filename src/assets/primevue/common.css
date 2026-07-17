@@ -25,7 +25,7 @@
 }
 
 .p-toggleable-content-leave-active {
-    @apply overflow-hidden transition-[max-height] animate-duration-[450ms] ease-[cubic-bezier(0,1,0,1)];
+    @apply overflow-hidden transition-[max-height] animate-duration-450 ease-[cubic-bezier(0,1,0,1)];
 }
 
 .p-toggleable-content-enter-active {

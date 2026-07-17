@@ -24,9 +24,6 @@ export async function buildScript(args: Args, entry: string, outPath: string) {
     build: {
       sourcemap: isDev ? "inline" : false,
       minify: !isDev,
-      terserOptions: {
-        mangle: false,
-      },
       watch: args.command === "watch" ? {} : undefined,
       outDir,
       emptyOutDir: false,

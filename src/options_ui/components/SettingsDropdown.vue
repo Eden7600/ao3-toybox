@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 
 interface Option {
   value: string;
@@ -55,7 +55,7 @@ const dropdownId = computed(() => `dropdown-${props.label.toLowerCase().replace(
         {{ description }}
       </p>
     </div>
-    <Dropdown
+    <Select
       :id="dropdownId"
       v-model="selectedOption"
       :options="options"

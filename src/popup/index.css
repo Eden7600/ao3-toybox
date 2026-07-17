@@ -1,7 +1,8 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "../assets/primevue/tailwind.css";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+@import "../assets/primevue/tailwind.css" layer(components);
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 
 /* Primary and Surface Palettes */

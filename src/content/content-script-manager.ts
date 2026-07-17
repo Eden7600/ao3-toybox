@@ -51,16 +51,16 @@ export class ContentScriptManager {
   }
 
   async handleMutations(mutations: MutationRecord[]): Promise<void> {
-    const promises = this.scripts
-      .map(
-        (script) => () =>
-          script.onMutation?.(mutations).catch((error: unknown) => {
-            this.logger.error(
-              `Error in onMutation for script ${script.constructor.name}: ${error instanceof Error ? error.message : String(error)}`,
-            );
-          }),
-      )
-      .map((fn) => fn());
-    await Promise.all(promises);
+    await Promise.all(
+      this.scripts.map(async (script) => {
+        try {
+          await script.onMutation?.(mutations);
+        } catch (error) {
+          this.logger.error(
+            `Error in onMutation for script ${script.constructor.name}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      }),
+    );
   }
 }
