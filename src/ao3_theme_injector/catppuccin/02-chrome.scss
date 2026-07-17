@@ -107,6 +107,9 @@
   background: transparent;
   border-color: transparent;
   color: var(--ctp-text);
+  /* Header nav stays flat — the raised treatment in 03-actions is for
+     page controls, not menu links */
+  box-shadow: none !important;
 }
 
 /* Nav hover/open elevates one step */
@@ -136,6 +139,7 @@
   color: var(--ctp-text);
   display: block;
   padding: 0.75em 0.5em 0.75em 0.5em;
+  box-shadow: none !important;
 }
 
 #header .dropdown .menu a:focus,

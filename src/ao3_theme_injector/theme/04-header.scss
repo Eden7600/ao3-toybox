@@ -40,6 +40,14 @@
   background: transparent;
   border-color: transparent;
   color: var(--text-link-color);
+  /* Header nav stays flat — the raised treatment in 03-actions is for
+     page controls, not menu links */
+  box-shadow: none !important;
+}
+
+#header .dropdown .menu a,
+#greeting .dropdown .menu a {
+  box-shadow: none !important;
 }
 
 #header .actions a:active,

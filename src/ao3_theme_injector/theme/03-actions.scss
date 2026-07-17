@@ -8,6 +8,10 @@ legend .action:link {
   margin: 0 0.5em;
 }
 
+/* Raised-button treatment, mirroring the injected UI variable-for-
+   variable (rt-base.css + work-toolbar.css): buttons rest on the box
+   background with a visible hairline border, a soft top-lit gradient,
+   an inset top highlight, and a hairline drop shadow. */
 button,
 input[type="submit"],
 .action,
@@ -19,9 +23,19 @@ input[type="submit"],
 .actions button,
 .current,
 .flash.notice .action {
-  background: var(--button-background-color);
-  border-color: transparent;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--box-background-color) 86%, #fff),
+    var(--box-background-color)
+  );
+  border: 1px solid var(--box-border-color-subtle);
+  border-radius: 6px;
   color: var(--text-color);
+  /* !important beats the universal `* { box-shadow: none !important }`
+     flattener in 02-base */
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent),
+    0 1px 2px rgba(0, 0, 0, 0.14) !important;
 }
 
 #outer .current,
@@ -46,8 +60,36 @@ span.claimed,
 .unreviewed,
 .ui-sortable li:hover {
   background: var(--button-current-color);
-  border-color: transparent;
+  border-color: var(--box-border-color-subtle);
   color: var(--text-link-color);
+}
+
+/* Pressed and current controls sink into the page instead of rising off
+   it. Status chips (unread/replied/own/…) share the background rule
+   above but are not buttons, so they stay shadow-free. */
+#outer .current,
+a.current,
+.current,
+legend .action:link:active,
+input:active[type="submit"],
+label.action:active,
+.action a:active,
+.actions a:active,
+.flash.notice .action:active {
+  border-color: var(--box-border-color-subtle);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.18) !important;
+}
+
+span.unread,
+span.claimed,
+.replied,
+.own,
+.draft,
+.draft .unread,
+.child,
+.unwrangled,
+.unreviewed {
+  box-shadow: none !important;
 }
 
 legend .action:link:hover,
@@ -69,17 +111,36 @@ input.button:hover,
 .flash.notice .action:visited:hover,
 .work.index.group .actions li a:hover,
 .work.index.group .actions li a:visited:hover {
-  background: var(--button-highlight-color);
-  border-color: transparent;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--button-highlight-color) 82%, #fff),
+    var(--button-highlight-color)
+  );
+  border-color: var(--box-border-color-subtle);
   color: var(--text-link-color);
 }
 
+/* Buttons don't telegraph visited state — override AO3's :visited
+   coloring so every action button reads uniformly */
 .actions a:visited,
 .action a:link,
-.action a:visited,
+.action a:visited {
+  color: var(--text-color);
+}
+
 .blurb h4 a:visited,
 .listbox .heading a:visited {
   color: var(--text-link-visited-color);
+}
+
+/* AO3's native RSS icon is an imageset sprite at fixed pixel offsets,
+   which can't center itself in the restyled button box. Replace it with
+   a self-contained SVG anchored to the vertical center. */
+a.rss span {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ee802e'%3E%3Ccircle cx='4.4' cy='19.6' r='2.6'/%3E%3Cpath d='M1.8 8.9v3.6c5.4 0 9.7 4.3 9.7 9.7h3.6c0-7.3-6-13.3-13.3-13.3z'/%3E%3Cpath d='M1.8 1.8v3.6c9.3 0 16.8 7.5 16.8 16.8h3.6c0-11.3-9.1-20.4-20.4-20.4z'/%3E%3C/svg%3E")
+    no-repeat left center;
+  background-size: 13px 13px;
+  padding-left: 18px;
 }
 
 dl.meta {
@@ -99,4 +160,5 @@ dd.actions {
 
 .action.top a:active {
   background: transparent;
+  box-shadow: none !important;
 }
