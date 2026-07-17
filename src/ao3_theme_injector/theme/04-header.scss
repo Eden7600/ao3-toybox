@@ -75,7 +75,10 @@
   border-color: var(--background-color);
   color: var(--text-color);
   display: block;
-  padding: 0.75em 0.5em 0.75em 0.5em;
+  padding: 0.5em 0.75em;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
 }
 
 /* dropdown menu links with dark hover */
@@ -96,11 +99,16 @@
   margin: auto;
 }
 
-// Remove stupid background that exists for no reason
-// All border radius should be 0.5em except for the top right which should be 0
-#header .dropdown-menu {
-  background: transparent;
+// Dropdown panels float like the injected UI's menus (rt-toolbar-menu-
+// panel): rounded, hairline border, and a real drop shadow. !important
+// beats the universal box-shadow flattener in 02-base.
+#header .dropdown-menu,
+#greeting .dropdown-menu {
+  background: var(--background-color);
   border: 1px solid var(--box-border-color-subtle);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
 }
 
 #header .heading a {

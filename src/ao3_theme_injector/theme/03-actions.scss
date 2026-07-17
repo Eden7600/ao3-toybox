@@ -30,7 +30,9 @@ input[type="submit"],
   );
   border: 1px solid var(--box-border-color-subtle);
   border-radius: 6px;
-  color: var(--text-color);
+  /* Rest text is muted (the injected UI's 62% formula); hover brings it
+     to full strength */
+  color: color-mix(in srgb, var(--text-color) 62%, var(--box-background-color));
   /* !important beats the universal `* { box-shadow: none !important }`
      flattener in 02-base */
   box-shadow:
@@ -117,7 +119,7 @@ input.button:hover,
     var(--button-highlight-color)
   );
   border-color: var(--box-border-color-subtle);
-  color: var(--text-link-color);
+  color: var(--text-color);
 }
 
 /* Buttons don't telegraph visited state — override AO3's :visited
@@ -125,7 +127,7 @@ input.button:hover,
 .actions a:visited,
 .action a:link,
 .action a:visited {
-  color: var(--text-color);
+  color: color-mix(in srgb, var(--text-color) 62%, var(--box-background-color));
 }
 
 .blurb h4 a:visited,

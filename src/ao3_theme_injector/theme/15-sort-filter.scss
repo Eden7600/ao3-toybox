@@ -90,10 +90,14 @@ dt.search dd {
   color: var(--ao3-accent-color);
 }
 
-/* this is the part where the sort and filter arrow .gifs are taken out */
+/* this is the part where the sort and filter arrow .gifs are taken out.
+   Expanders are disclosure rows, not buttons — exempt them from the
+   raised-button treatment in 03-actions */
 .filters .expander,
 .filters .expanded .expander {
   background: transparent;
+  border: 0;
+  box-shadow: none !important;
 }
 
 /* and replaced! hi, meet right unicode arrow */
@@ -106,9 +110,23 @@ dt.search dd {
   content: "\23F7\00A0";
 }
 
-/* parent expander buttons are too far in, so they're scooching over a skosh */
+/* Expanders read as full-width rows: muted at rest, brightening with a
+   soft surface tint on hover, like the injected UI's list rows */
 .filters button.expander {
-  padding: 0;
+  width: 100%;
+  padding: 0.3em 0.4em;
+  border-radius: 6px;
+  text-align: left;
+  color: color-mix(in srgb, var(--text-color) 62%, var(--background-color));
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.filters button.expander:hover,
+.filters button.expander:focus-visible {
+  background: var(--button-background-color);
+  color: var(--text-color);
 }
 
 /* opposite with the kiddos */

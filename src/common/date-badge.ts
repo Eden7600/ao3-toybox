@@ -10,15 +10,7 @@ export const DATE_TEXT_KEYFRAMES: ColorKeyframe[] = [
   { days: 730, color: [153, 27, 27] }, // Red
 ];
 
-export const DATE_BACKGROUND_KEYFRAMES: ColorKeyframe[] = [
-  { days: 0, color: [236, 252, 203] }, // Green
-  { days: 180, color: [254, 249, 195] }, // Yellow
-  { days: 365, color: [255, 237, 213] }, // Orange
-  { days: 730, color: [254, 226, 226] }, // Red
-];
-
 export const COMPLETED_TEXT_COLOR = [63, 98, 18];
-export const COMPLETED_BACKGROUND_COLOR = [236, 252, 203];
 
 export function interpolateColor(
   keyframes: ColorKeyframe[],
@@ -79,23 +71,33 @@ export type DateBadgeStyle = {
   padding: string;
   borderRadius: string;
   border: string;
+  fontWeight: string;
 };
 
 /**
- * Inline styles for a date badge. In OLED mode the text/border brighten
- * and the background is dropped, matching the content script's rendering.
+ * Inline styles for a date badge, shaped like the injected toolbar's
+ * status chips: a pill whose background, border, and text mix the status
+ * hue with the page's theme variables, so it tints correctly on light,
+ * dark, and unthemed pages alike. In OLED mode the text/border brighten
+ * and the background is dropped.
  */
-export function dateBadgeStyle(
-  color: number[],
-  backgroundColor: number[] | undefined,
-  oled: boolean,
-): DateBadgeStyle {
+export function dateBadgeStyle(color: number[], oled: boolean): DateBadgeStyle {
+  const status = convertToRGB(color, oled);
+
   return {
-    color: convertToRGB(color, oled),
-    backgroundColor:
-      !oled && backgroundColor ? convertToRGB(backgroundColor) : null,
+    color: oled
+      ? status
+      : `color-mix(in srgb, ${status} 72%, var(--text-color, #3f3f3f))`,
+    backgroundColor: oled
+      ? null
+      : `color-mix(in srgb, ${status} 12%, var(--box-background-color, #ffffff))`,
     padding: "2px 10px",
-    borderRadius: "4px",
-    border: `${oled ? "2px" : "1px"} solid ${convertToRGB(color, oled)}`,
+    borderRadius: "999px",
+    border: `${oled ? "2px" : "1px"} solid ${
+      oled
+        ? status
+        : `color-mix(in srgb, ${status} 55%, var(--box-background-color, #ffffff))`
+    }`,
+    fontWeight: "600",
   };
 }

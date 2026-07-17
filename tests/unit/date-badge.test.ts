@@ -1,5 +1,4 @@
 import {
-  DATE_BACKGROUND_KEYFRAMES,
   DATE_TEXT_KEYFRAMES,
   dateBadgeStyle,
   interpolateColor,
@@ -24,9 +23,7 @@ describe("interpolateColor", () => {
   });
 
   it("clamps past the last keyframe", () => {
-    expect(interpolateColor(DATE_BACKGROUND_KEYFRAMES, 5000)).toEqual([
-      254, 226, 226,
-    ]);
+    expect(interpolateColor(DATE_TEXT_KEYFRAMES, 5000)).toEqual([153, 27, 27]);
   });
 });
 
@@ -44,21 +41,27 @@ describe("naturalDateLabel", () => {
 });
 
 describe("dateBadgeStyle", () => {
-  it("renders a filled badge in normal mode", () => {
-    const style = dateBadgeStyle([63, 98, 18], [236, 252, 203], false);
+  it("renders a theme-aware chip in normal mode", () => {
+    const style = dateBadgeStyle([63, 98, 18], false);
 
-    expect(style.color).toBe("rgb(63, 98, 18)");
-    expect(style.backgroundColor).toBe("rgb(236, 252, 203)");
-    expect(style.border).toBe("1px solid rgb(63, 98, 18)");
+    expect(style.color).toBe(
+      "color-mix(in srgb, rgb(63, 98, 18) 72%, var(--text-color, #3f3f3f))",
+    );
+    expect(style.backgroundColor).toBe(
+      "color-mix(in srgb, rgb(63, 98, 18) 12%, var(--box-background-color, #ffffff))",
+    );
+    expect(style.border).toBe(
+      "1px solid color-mix(in srgb, rgb(63, 98, 18) 55%, var(--box-background-color, #ffffff))",
+    );
+    expect(style.borderRadius).toBe("999px");
+    expect(style.fontWeight).toBe("600");
   });
 
   it("brightens and drops the background in OLED mode", () => {
-    const style = dateBadgeStyle([63, 98, 18], [236, 252, 203], true);
+    const style = dateBadgeStyle([63, 98, 18], true);
 
     expect(style.backgroundColor).toBeNull();
-    expect(style.border).toContain("2px solid");
-    expect(style.color).toBe(
-      `rgb(${String(Math.min(255, Math.round(63 * 1.3)))}, ${String(Math.min(255, Math.round(98 * 1.3)))}, ${String(Math.min(255, Math.round(18 * 1.3)))})`,
-    );
+    expect(style.border).toBe("2px solid rgb(82, 127, 23)");
+    expect(style.color).toBe("rgb(82, 127, 23)");
   });
 });

@@ -36,7 +36,9 @@ input[type="submit"],
   );
   border: 1px solid var(--ctp-surface0);
   border-radius: 6px;
-  color: var(--ctp-text);
+  /* Rest text is muted (the injected UI's 62% formula); hover brings it
+     to full strength */
+  color: color-mix(in srgb, var(--ctp-text) 62%, var(--ctp-mantle));
   /* !important beats the universal `* { box-shadow: none !important }`
      flattener in 01-base */
   box-shadow:
@@ -113,7 +115,7 @@ label.action:active,
 .actions a:visited,
 .action a:link,
 .action a:visited {
-  color: var(--ctp-text);
+  color: color-mix(in srgb, var(--ctp-text) 62%, var(--ctp-mantle));
 }
 
 /* AO3's native RSS icon is an imageset sprite at fixed pixel offsets,

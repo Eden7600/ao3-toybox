@@ -144,7 +144,13 @@ form dd.required,
 .filters .indicator:before {
   background: var(--ctp-surface1);
   border: 1px solid transparent;
+  border-radius: 5px;
   color: var(--ctp-overlay1);
+  transition: background-color 0.12s ease;
+}
+
+.filters label:hover .indicator:before {
+  background: var(--ctp-surface2);
 }
 
 .filters input:checked + .indicator:before {
@@ -169,10 +175,14 @@ form dd.required,
   );
 }
 
-/* Replace the sort/filter arrow gifs with unicode arrows */
+/* Replace the sort/filter arrow gifs with unicode arrows. Expanders are
+   disclosure rows, not buttons — exempt them from the raised-button
+   treatment in 03-actions */
 .filters .expander,
 .filters .expanded .expander {
   background: transparent;
+  border: 0;
+  box-shadow: none !important;
 }
 
 .filters .expander::before {
@@ -183,8 +193,23 @@ form dd.required,
   content: "\23F7\00A0";
 }
 
+/* Expanders read as full-width rows: muted at rest, brightening with a
+   soft surface tint on hover, like the injected UI's list rows */
 .filters button.expander {
-  padding: 0;
+  width: 100%;
+  padding: 0.3em 0.4em;
+  border-radius: 6px;
+  text-align: left;
+  color: var(--ctp-subtext0);
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.filters button.expander:hover,
+.filters button.expander:focus-visible {
+  background: var(--ctp-surface0);
+  color: var(--ctp-text);
 }
 
 #work_crossover li,

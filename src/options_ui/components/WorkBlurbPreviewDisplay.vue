@@ -10,9 +10,7 @@ import {
 } from "@src/common/blurb-stats";
 import { Color } from "@src/common/color";
 import {
-  COMPLETED_BACKGROUND_COLOR,
   COMPLETED_TEXT_COLOR,
-  DATE_BACKGROUND_KEYFRAMES,
   DATE_TEXT_KEYFRAMES,
   dateBadgeStyle,
   interpolateColor,
@@ -177,6 +175,7 @@ function badgeStyleAttr(style: DateBadgeStyle): string {
     `padding: ${style.padding}`,
     `border-radius: ${style.borderRadius}`,
     `border: ${style.border}`,
+    `font-weight: ${style.fontWeight}`,
   ].filter(Boolean);
 
   return parts.join("; ");
@@ -201,18 +200,13 @@ function datetimeHtml(work: SampleWork, settings: Settings): string {
   if (settings.enableDateBadge) {
     style = dateBadgeStyle(
       interpolateColor(DATE_TEXT_KEYFRAMES, work.daysAgo),
-      interpolateColor(DATE_BACKGROUND_KEYFRAMES, work.daysAgo),
       settings.ao3ThemeOled,
     );
   }
 
   if (completed) {
     if (settings.enableDateBadge) {
-      style = dateBadgeStyle(
-        COMPLETED_TEXT_COLOR,
-        COMPLETED_BACKGROUND_COLOR,
-        settings.ao3ThemeOled,
-      );
+      style = dateBadgeStyle(COMPLETED_TEXT_COLOR, settings.ao3ThemeOled);
     }
 
     if (settings.showCompletedText) {

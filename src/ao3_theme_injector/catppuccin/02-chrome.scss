@@ -126,10 +126,16 @@
   border-color: var(--ctp-surface1);
 }
 
-/* Dropdown panels float at surface0 with a hairline */
-#header .dropdown-menu {
+/* Dropdown panels float at surface0 like the injected UI's menus
+   (rt-toolbar-menu-panel): rounded, hairline border, real drop shadow.
+   !important beats the universal box-shadow flattener in 01-base. */
+#header .dropdown-menu,
+#greeting .dropdown-menu {
   background: var(--ctp-surface0);
   border: 1px solid var(--ctp-surface1);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
 }
 
 #header .dropdown .menu a,
@@ -138,8 +144,11 @@
   border-color: var(--ctp-surface0);
   color: var(--ctp-text);
   display: block;
-  padding: 0.75em 0.5em 0.75em 0.5em;
+  padding: 0.5em 0.75em;
   box-shadow: none !important;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
 }
 
 #header .dropdown .menu a:focus,

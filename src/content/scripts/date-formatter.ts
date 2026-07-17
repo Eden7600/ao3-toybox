@@ -1,7 +1,5 @@
 import {
-  COMPLETED_BACKGROUND_COLOR,
   COMPLETED_TEXT_COLOR,
-  DATE_BACKGROUND_KEYFRAMES,
   DATE_TEXT_KEYFRAMES,
   dateBadgeStyle,
   interpolateColor,
@@ -16,16 +14,8 @@ export default class DateFormatter extends ContentScript {
     );
   }
 
-  applyDateStyles(
-    element: HTMLElement,
-    color: number[],
-    backgroundColor?: number[],
-  ) {
-    const style = dateBadgeStyle(
-      color,
-      backgroundColor,
-      this.settings.ao3ThemeOled,
-    );
+  applyDateStyles(element: HTMLElement, color: number[]) {
+    const style = dateBadgeStyle(color, this.settings.ao3ThemeOled);
 
     element.style.color = style.color;
 
@@ -36,6 +26,7 @@ export default class DateFormatter extends ContentScript {
     element.style.padding = style.padding;
     element.style.borderRadius = style.borderRadius;
     element.style.border = style.border;
+    element.style.fontWeight = style.fontWeight;
   }
 
   async onProcess(): Promise<void> {
@@ -69,12 +60,8 @@ export default class DateFormatter extends ContentScript {
 
       if (this.settings.enableDateBadge) {
         const color = interpolateColor(DATE_TEXT_KEYFRAMES, daysDifference);
-        const backgroundColor = interpolateColor(
-          DATE_BACKGROUND_KEYFRAMES,
-          daysDifference,
-        );
 
-        this.applyDateStyles(newUpdatedElement, color, backgroundColor);
+        this.applyDateStyles(newUpdatedElement, color);
       }
 
       if (this.settings.enableDateNaturalLanguage) {
@@ -98,11 +85,7 @@ export default class DateFormatter extends ContentScript {
         // Badge styling is opt-in via enableDateBadge — completed works
         // used to get badged even with the setting off
         if (this.settings.enableDateBadge) {
-          this.applyDateStyles(
-            newUpdatedElement,
-            COMPLETED_TEXT_COLOR,
-            COMPLETED_BACKGROUND_COLOR,
-          );
+          this.applyDateStyles(newUpdatedElement, COMPLETED_TEXT_COLOR);
         }
 
         // Replace date text with "Completed" for completed works
