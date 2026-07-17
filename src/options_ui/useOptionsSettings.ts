@@ -1,5 +1,6 @@
-import { useToast } from "primevue/usetoast";
 import { onMounted, ref, watch, type Ref } from "vue";
+
+import { useToast } from "@src/common/ui";
 
 import { Logger } from "@src/common/logger";
 import {

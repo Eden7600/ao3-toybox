@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import MultiSelect from "primevue/multiselect";
+
+import { MultiSelect } from "@src/common/ui";
 
 interface Option {
   value: string;
@@ -61,18 +62,16 @@ const multiSelectId = computed(() => `multiselect-${props.label.toLowerCase().re
         {{ description }}
       </p>
     </div>
-    <MultiSelect
-      :id="multiSelectId"
-      v-model="selectedValues"
-      :options="options"
-      optionLabel="label"
-      optionValue="value"
-      :placeholder="placeholder"
-      :disabled="disabled"
-      :aria-label="label"
-      display="chip"
-      filter
-      class="w-full sm:w-[20rem]"
-    />
+    <div class="w-full sm:w-[20rem]">
+      <MultiSelect
+        :id="multiSelectId"
+        v-model="selectedValues"
+        :options="options"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :aria-label="label"
+        filter
+      />
+    </div>
   </div>
 </template>

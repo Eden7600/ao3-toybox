@@ -3,10 +3,10 @@ import { normalizeServerUrl } from "@src/common/server-url";
 import { authService } from "@src/common/services/auth-service";
 import SettingsToggle from "@src/options_ui/components/SettingsToggle.vue";
 import { useOptionsSettings } from "@src/options_ui/useOptionsSettings";
-import Button from "primevue/button";
-import InputText from "primevue/inputtext";
-import { useToast } from "primevue/usetoast";
+import { Eye, EyeOff, Zap } from "@lucide/vue";
 import { computed, ref } from "vue";
+
+import { Button, Input, useToast } from "@src/common/ui";
 
 const { settings: localSettings } = useOptionsSettings("ServerSettings");
 const toast = useToast();
@@ -80,7 +80,7 @@ const onTestConnection = async () => {
           extension ships without one — anyone can host their own. Nothing is
           contacted until a URL is set.
         </p>
-        <InputText
+        <Input
           id="serverUrlInput"
           v-model.lazy="localSettings.serverUrl"
           type="url"
@@ -104,7 +104,7 @@ const onTestConnection = async () => {
           for how to obtain one. The token is stored locally in this browser only.
         </p>
         <div class="flex flex-wrap items-center gap-2">
-          <InputText
+          <Input
             id="apiTokenInput"
             v-model="localSettings.apiToken"
             :type="showToken ? 'text' : 'password'"
@@ -117,19 +117,22 @@ const onTestConnection = async () => {
             placeholder="Paste token here"
           />
           <Button
-            :icon="showToken ? 'pi pi-eye-slash' : 'pi pi-eye'"
-            severity="secondary"
-            text
+            variant="secondary"
+            size="icon"
             :aria-label="showToken ? 'Hide token' : 'Show token'"
             @click="showToken = !showToken"
-          />
+          >
+            <EyeOff v-if="showToken" class="w-4 h-4" aria-hidden="true" />
+            <Eye v-else class="w-4 h-4" aria-hidden="true" />
+          </Button>
           <Button
-            label="Test connection"
-            icon="pi pi-bolt"
             :loading="testing"
             :disabled="!localSettings.apiToken || !serverConfigured"
             @click="onTestConnection"
-          />
+          >
+            <Zap class="w-4 h-4" aria-hidden="true" />
+            Test connection
+          </Button>
         </div>
         <p v-if="tokenPreview" class="text-gray-500 text-xs mt-2">
           Current: {{ tokenPreview }}

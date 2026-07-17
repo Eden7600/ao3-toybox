@@ -1,52 +1,64 @@
 <script setup lang="ts">
-import ConfirmDialog from "primevue/confirmdialog";
-import Toast from "primevue/toast";
-import { ref } from "vue";
+import {
+  BookOpen,
+  EyeOff,
+  FileInput,
+  History,
+  House,
+  List,
+  Menu,
+  Palette,
+  Search,
+  Server,
+  Tags,
+} from "@lucide/vue";
+import { ref, type Component } from "vue";
 import { useRouter } from "vue-router";
 
 import { serverFeaturesEnabled } from "@src/common/build-env";
+import { ConfirmDialog, Toaster } from "@src/common/ui";
 import { isDevBuild } from "./build-env";
 import NavItem from "./components/NavItem.vue";
 
-type NavEntry = { label: string; to: string; icon: string };
+type NavEntry = { label: string; to: string; icon: Component };
 type NavGroup = { heading: string | null; items: NavEntry[] };
 
 // Single nav model drives both the desktop sidebar and the mobile drawer
 const navGroups: NavGroup[] = [
   {
     heading: null,
-    items: [{ label: "Welcome", to: "/welcome", icon: "pi pi-home" }],
+    items: [{ label: "Welcome", to: "/welcome", icon: House }],
   },
   {
     heading: "Appearance",
     items: [
-      { label: "Theme", to: "/theme", icon: "pi pi-palette" },
-      { label: "Work Listings", to: "/listings", icon: "pi pi-list" },
+      { label: "Theme", to: "/theme", icon: Palette },
+      { label: "Work Listings", to: "/listings", icon: List },
     ],
   },
   {
     heading: "Tags & Filters",
     items: [
-      { label: "Hide Works", to: "/hide-works", icon: "pi pi-eye-slash" },
-      { label: "Highlighted Tags", to: "/common-tags", icon: "pi pi-tags" },
-      { label: "Regex Tags", to: "/regex-tags", icon: "pi pi-search" },
+      { label: "Hide Works", to: "/hide-works", icon: EyeOff },
+      { label: "Highlighted Tags", to: "/common-tags", icon: Tags },
+      { label: "Regex Tags", to: "/regex-tags", icon: Search },
     ],
   },
   {
     heading: "Reading",
     items: [
-      { label: "Reading", to: "/reading", icon: "pi pi-book" },
-      { label: "Reading History", to: "/tracking", icon: "pi pi-history" },
+      { label: "Reading", to: "/reading", icon: BookOpen },
+      { label: "Reading History", to: "/tracking", icon: History },
     ],
   },
   {
     heading: "Data",
     items: [
-      { label: "Import / Export", to: "/export", icon: "pi pi-file-import" },
+      { label: "Import / Export", to: "/export", icon: FileInput },
       // Offline-first release: the server page only exists in dev builds
       // that ship the server features
       ...(isDevBuild && serverFeaturesEnabled
-        ? [{ label: "Server", to: "/server", icon: "pi pi-server" }]
+        ? [{ label: "Server", to: "/server", icon: Server }]
         : []),
     ],
   },
@@ -73,7 +85,7 @@ router.afterEach(() => {
         :aria-expanded="drawerOpen"
         @click="drawerOpen = true"
       >
-        <i class="pi pi-bars"></i>
+        <Menu class="w-5 h-5" aria-hidden="true" />
       </button>
       <h1 class="text-lg font-bold dark:text-white">AO3 Toys</h1>
     </header>
@@ -115,11 +127,11 @@ router.afterEach(() => {
                 :label="item.label"
                 :to="item.to"
               >
-                <div
+                <component
+                  :is="item.icon"
                   class="w-5 h-5 dark:text-gray-400 transition duration-75 group-hover:text-white"
-                >
-                  <i :class="item.icon"></i>
-                </div>
+                  aria-hidden="true"
+                />
               </NavItem>
             </ul>
           </template>
@@ -129,7 +141,7 @@ router.afterEach(() => {
       <main
         class="flex-1 min-w-0 pb-4 h-full overflow-y-auto px-4 md:pl-4 md:pr-0 pt-4 md:pt-0"
       >
-        <Toast />
+        <Toaster />
         <ConfirmDialog />
         <RouterView />
       </main>

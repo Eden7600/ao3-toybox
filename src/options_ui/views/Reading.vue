@@ -4,7 +4,7 @@ import SettingsDropdown from "@src/options_ui/components/SettingsDropdown.vue";
 import SettingsNumber from "@src/options_ui/components/SettingsNumber.vue";
 import SettingsToggle from "@src/options_ui/components/SettingsToggle.vue";
 import { useOptionsSettings } from "@src/options_ui/useOptionsSettings";
-import { useToast } from "primevue/usetoast";
+import { useToast } from "@src/common/ui";
 
 const { settings } = useOptionsSettings("Reading");
 const toast = useToast();

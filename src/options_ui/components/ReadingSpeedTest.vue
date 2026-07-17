@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Check, Timer } from "@lucide/vue";
 import { wpmFromTest } from "@src/common/reading-time";
 import { computed, ref } from "vue";
 
@@ -60,7 +61,7 @@ const comparison = computed(() => {
         class="px-4 py-2 bg-primary-600 hover:bg-primary-500 rounded-md text-sm font-medium text-white transition-colors"
         @click="start"
       >
-        <i class="pi pi-stopwatch mr-1"></i>
+        <Timer class="w-4 h-4 inline-block mr-1 align-text-bottom" aria-hidden="true" />
         Start reading
       </button>
     </div>
@@ -75,7 +76,7 @@ const comparison = computed(() => {
         class="px-4 py-2 bg-primary-600 hover:bg-primary-500 rounded-md text-sm font-medium text-white transition-colors"
         @click="finish"
       >
-        <i class="pi pi-check mr-1"></i>
+        <Check class="w-4 h-4 inline-block mr-1 align-text-bottom" aria-hidden="true" />
         Done reading
       </button>
     </div>

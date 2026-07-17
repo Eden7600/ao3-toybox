@@ -6,6 +6,7 @@ import {
   type HideSource,
 } from "@src/common/hide-modes";
 import type { Settings } from "@src/common/settings";
+import { EyeOff, SlidersHorizontal } from "@lucide/vue";
 import { computed } from "vue";
 
 const props = defineProps<{
@@ -119,7 +120,7 @@ const applyWordPreset = (preset: WordPreset) => {
       class="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-900 transition-colors disabled:opacity-50"
       @click="toggleMaster"
     >
-      <i class="pi pi-eye-slash text-gray-400 text-sm w-4"></i>
+      <EyeOff class="w-4 h-4 shrink-0 text-gray-400" aria-hidden="true" />
       <span class="flex-1 min-w-0">
         <span class="block text-sm font-medium">Work hiding</span>
         <span class="block text-[11px] text-gray-500 leading-snug"
@@ -215,7 +216,7 @@ const applyWordPreset = (preset: WordPreset) => {
       class="w-full px-3 py-2 flex items-center justify-center gap-2 bg-surface-800 hover:bg-surface-700 rounded-md text-sm font-medium transition-colors"
       @click="emit('options')"
     >
-      <i class="pi pi-sliders-h"></i>
+      <SlidersHorizontal class="w-4 h-4" aria-hidden="true" />
       Thresholds &amp; more in Options
     </button>
   </div>

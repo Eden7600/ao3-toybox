@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronLeft } from "@lucide/vue";
 import { ref } from "vue";
 import HideFiltersScreen from "./screens/HideFiltersScreen.vue";
 import HomeScreen from "./screens/HomeScreen.vue";
@@ -31,7 +32,7 @@ const { settings, version, updateSettings, openOptions } = usePopupSettings();
         aria-label="Back"
         @click="screen = 'home'"
       >
-        <i class="pi pi-chevron-left text-sm"></i>
+        <ChevronLeft class="w-4 h-4" aria-hidden="true" />
       </button>
       <img v-else src="../icons/icon-32.png" alt="" class="w-7 h-7" />
       <h1 class="text-base font-bold leading-tight">

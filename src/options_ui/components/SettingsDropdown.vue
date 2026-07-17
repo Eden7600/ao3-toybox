@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import Select from "primevue/select";
+
+import { Select } from "@src/common/ui";
 
 interface Option {
   value: string;
@@ -55,16 +56,15 @@ const dropdownId = computed(() => `dropdown-${props.label.toLowerCase().replace(
         {{ description }}
       </p>
     </div>
-    <Select
-      :id="dropdownId"
-      v-model="selectedOption"
-      :options="options"
-      optionLabel="label"
-      optionValue="value"
-      :placeholder="placeholder"
-      :disabled="disabled"
-      :aria-label="label"
-      class="w-full sm:w-[16rem]"
-    />
+    <div class="w-full sm:w-[16rem]">
+      <Select
+        :id="dropdownId"
+        v-model="selectedOption"
+        :options="options"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :aria-label="label"
+      />
+    </div>
   </div>
 </template>

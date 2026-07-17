@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import {
+  BookOpen,
+  ChevronRight,
+  EyeOff,
+  Filter,
+  Moon,
+  Palette,
+  Settings as SettingsIcon,
+} from "@lucide/vue";
+import { computed, type Component } from "vue";
 
 import { serverFeaturesEnabled } from "@src/common/build-env";
 import type { Settings } from "@src/common/settings";
@@ -13,7 +22,7 @@ type ToggleKey =
 type QuickToggle = {
   key: ToggleKey;
   label: string;
-  icon: string;
+  icon: Component;
   hint: string;
 };
 
@@ -21,25 +30,25 @@ const quickToggles: QuickToggle[] = [
   {
     key: "hideWorks",
     label: "Work hiding",
-    icon: "pi-eye-slash",
+    icon: EyeOff,
     hint: "Master switch — off shows everything, filters keep their settings",
   },
   {
     key: "enableTagHighlighter",
     label: "Tag highlights",
-    icon: "pi-palette",
+    icon: Palette,
     hint: "Colored tags and the inline tag controls",
   },
   {
     key: "ao3ThemeEnabled",
     label: "AO3 theme",
-    icon: "pi-moon",
+    icon: Moon,
     hint: "Injected site theme",
   },
   {
     key: "enableReaderSettings",
     label: "Reading settings",
-    icon: "pi-book",
+    icon: BookOpen,
     hint: "Reader panel on work pages",
   },
 ];
@@ -48,13 +57,13 @@ const navRows = [
   {
     screen: "filters" as const,
     label: "Hide filters",
-    icon: "pi-filter",
+    icon: Filter,
     hint: "Per-filter behaviors and word-count presets",
   },
   {
     screen: "theme" as const,
     label: "Theme",
-    icon: "pi-palette",
+    icon: Palette,
     hint: "Accent color and OLED mode",
   },
 ];
@@ -114,7 +123,7 @@ const serverConnected = computed(() =>
       class="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-900 transition-colors disabled:opacity-50"
       @click="toggle(item.key)"
     >
-      <i class="pi text-gray-400 text-sm w-4" :class="item.icon"></i>
+      <component :is="item.icon" class="w-4 h-4 shrink-0 text-gray-400" aria-hidden="true" />
       <span class="flex-1 min-w-0">
         <span class="block text-sm font-medium">{{ item.label }}</span>
         <span class="block text-[11px] text-gray-500 leading-snug">{{
@@ -143,14 +152,14 @@ const serverConnected = computed(() =>
       class="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-900 transition-colors disabled:opacity-50"
       @click="emit('navigate', row.screen)"
     >
-      <i class="pi text-gray-400 text-sm w-4" :class="row.icon"></i>
+      <component :is="row.icon" class="w-4 h-4 shrink-0 text-gray-400" aria-hidden="true" />
       <span class="flex-1 min-w-0">
         <span class="block text-sm font-medium">{{ row.label }}</span>
         <span class="block text-[11px] text-gray-500 leading-snug">{{
           row.hint
         }}</span>
       </span>
-      <i class="pi pi-chevron-right text-gray-500 text-xs"></i>
+      <ChevronRight class="w-3.5 h-3.5 shrink-0 text-gray-500" aria-hidden="true" />
     </button>
   </div>
 
@@ -168,7 +177,7 @@ const serverConnected = computed(() =>
       class="w-full px-3 py-2 flex items-center justify-center gap-2 bg-surface-800 hover:bg-surface-700 rounded-md text-sm font-medium transition-colors"
       @click="emit('options')"
     >
-      <i class="pi pi-cog"></i>
+      <SettingsIcon class="w-4 h-4" aria-hidden="true" />
       Options
     </button>
   </div>

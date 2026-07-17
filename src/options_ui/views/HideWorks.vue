@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Info } from "@lucide/vue";
 import { hideSourceLabels } from "@src/common/hide-modes";
 import SettingsDropdown from "@src/options_ui/components/SettingsDropdown.vue";
 import SettingsMultiSelect from "@src/options_ui/components/SettingsMultiSelect.vue";
@@ -346,7 +347,7 @@ const modesDisabled = computed(() => !settings.value.hideWorks);
   <!-- Information Panel -->
   <div class="px-4 py-4 bg-surface-800 rounded-lg mt-3">
     <div class="flex items-start gap-3">
-      <i class="pi pi-info-circle text-blue-400 text-xl mt-1"></i>
+      <Info class="w-6 h-6 text-blue-400 mt-1 shrink-0" aria-hidden="true" />
       <div class="text-white">
         <h3 class="font-semibold text-lg mb-2">How Work Hiding Works</h3>
         <ul class="list-disc list-inside space-y-1 text-gray-300">

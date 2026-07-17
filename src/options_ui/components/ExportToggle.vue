@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Checkbox from "primevue/checkbox";
+import { Checkbox } from "@src/common/ui";
 
 defineProps({
   modelValue: Boolean,
@@ -13,7 +13,7 @@ const model = defineModel<boolean>();
 
 <template>
   <div class="flex items-center py-2.5 px-2">
-    <Checkbox :inputId="id" v-model="model" :binary="true" size="small" />
+    <Checkbox :id="id" v-model="model" size="sm" />
     <label :for="id" class="ml-2 text-sm text-gray-300 cursor-pointer">
       {{ label }}
     </label>

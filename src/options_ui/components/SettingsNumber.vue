@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import InputNumber from "primevue/inputnumber";
+
+import { NumberInput } from "@src/common/ui";
 
 interface Props {
   modelValue: number;
@@ -53,19 +54,15 @@ const inputId = computed(() => `number-${props.label.toLowerCase().replace(/\s+/
         {{ description }}
       </p>
     </div>
-    <InputNumber
+    <NumberInput
       :id="inputId"
       v-model="model"
       :min="min"
       :max="max"
       :step="step"
-      :maxFractionDigits="maxFractionDigits"
+      :max-fraction-digits="maxFractionDigits"
       :disabled="disabled"
       :aria-label="label"
-      showButtons
-      buttonLayout="horizontal"
-      incrementButtonIcon="pi pi-plus"
-      decrementButtonIcon="pi pi-minus"
     />
   </div>
 </template>

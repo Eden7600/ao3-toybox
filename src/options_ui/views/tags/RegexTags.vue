@@ -3,22 +3,28 @@ import { db } from "@src/common/db/Database";
 import type { RegexTag } from "@src/common/models/RegexTag";
 import { computed, onMounted, ref } from "vue";
 
-import Button from "primevue/button";
-import Checkbox from "primevue/checkbox";
-import Column from "primevue/column";
-import ContextMenu from "primevue/contextmenu";
-import DataTable from "primevue/datatable";
-import Dialog from "primevue/dialog";
-import Select from "primevue/select";
-import InputText from "primevue/inputtext";
-import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
+import { Check, CircleCheck, CircleX, FilterX, Pencil, Plus, Trash2, X } from "@lucide/vue";
+
+import {
+  Button,
+  Checkbox,
+  ContextMenu,
+  DataTable,
+  Dialog,
+  Input,
+  Select,
+  useConfirm,
+  useToast,
+  type DataTableColumn,
+  type MenuItem,
+} from "@src/common/ui";
 
 const regexTags = ref<RegexTag[]>([]);
 const loading = ref(true);
 const globalFilterValue = ref("");
 const selectedTag = ref<RegexTag | null>(null);
-const contextMenu = ref();
+const contextMenu = ref<InstanceType<typeof ContextMenu>>();
+const table = ref<InstanceType<typeof DataTable>>();
 const editDialog = ref(false);
 const newTagDialog = ref(false);
 const editedTag = ref<RegexTag | null>(null);
@@ -43,25 +49,24 @@ const colors = ref([
 const toast = useToast();
 const confirm = useConfirm();
 
-const filters = ref({
-  global: { value: null, matchMode: "contains" },
-  name: { value: null, matchMode: "startsWith" },
-  regex: { value: null, matchMode: "contains" },
-  color: { value: null, matchMode: "startsWith" },
-  hideWork: { value: null, matchMode: "equals" },
-  hideTag: { value: null, matchMode: "equals" },
-  caseInsensitive: { value: null, matchMode: "equals" },
-});
+const columns: DataTableColumn[] = [
+  { field: "name", header: "Name", sortable: true, filter: true, filterPlaceholder: "Search by name", width: "20%" },
+  { field: "regex", header: "Regex", sortable: true, filter: true, filterPlaceholder: "Search regex", width: "30%" },
+  { field: "color", header: "Color", sortable: true, filter: true, filterPlaceholder: "Search by color", width: "15%" },
+  { field: "hideWork", header: "Hide Work", sortable: true, width: "10%" },
+  { field: "hideTag", header: "Hide Tag", sortable: true, width: "10%" },
+  { field: "caseInsensitive", header: "Case Insensitive", sortable: true, width: "15%" },
+];
 
-const menuModel = ref([
+const menuModel = ref<MenuItem[]>([
   {
     label: "Edit",
-    icon: "pi pi-fw pi-pencil",
+    icon: Pencil,
     command: () => openEditDialog(selectedTag.value!),
   },
   {
     label: "Delete",
-    icon: "pi pi-fw pi-trash",
+    icon: Trash2,
     command: () => confirmDeleteTag(selectedTag.value!),
   },
 ]);
@@ -89,7 +94,8 @@ const filteredTags = computed(() => {
 });
 
 const onRowContextMenu = (event: { originalEvent: MouseEvent; data: RegexTag }) => {
-  contextMenu.value.show(event.originalEvent);
+  selectedTag.value = event.data;
+  contextMenu.value?.show(event.originalEvent);
 };
 
 const openEditDialog = (tag: RegexTag) => {
@@ -114,7 +120,7 @@ const confirmDeleteTag = (tag: RegexTag) => {
   confirm.require({
     message: `Are you sure you want to delete the regex tag "${tag.name}"?`,
     header: "Confirm Deletion",
-    icon: "pi pi-exclamation-triangle",
+    acceptLabel: "Delete",
     accept: () => deleteTag(tag),
     reject: () => {
       toast.add({ severity: "info", summary: "Cancelled", detail: "Tag deletion cancelled", life: 3000 });
@@ -207,6 +213,7 @@ const saveNewTag = async () => {
 
 const resetFilters = () => {
   globalFilterValue.value = "";
+  table.value?.clearFilters();
 };
 </script>
 
@@ -224,243 +231,190 @@ const resetFilters = () => {
     <ContextMenu ref="contextMenu" :model="menuModel" />
 
     <DataTable
-      v-model:filters="filters"
+      ref="table"
       :value="filteredTags"
-      v-model:contextMenuSelection="selectedTag"
-      dataKey="id"
-      :paginator="true"
+      :columns="columns"
+      paginator
       :rows="10"
-      :rowsPerPageOptions="[5, 10, 20, 50]"
+      :rows-per-page-options="[5, 10, 20, 50]"
       :loading="loading"
-      :globalFilterFields="['name', 'regex', 'color']"
-      filterDisplay="row"
-      contextMenu
-      @rowContextmenu="onRowContextMenu"
+      @row-contextmenu="onRowContextMenu"
     >
       <template #header>
         <div class="flex flex-wrap justify-between items-center gap-2">
-          <Button
-            icon="pi pi-plus"
-            label="New Regex Tag"
-            severity="success"
-            class="mr-2"
-            @click="openNewTagDialog"
-          />
-          <div class="flex items-center">
-            <span class="mr-2">
-              <InputText v-model="globalFilterValue" placeholder="Global Search" />
-            </span>
-            <Button icon="pi pi-filter-slash" @click="resetFilters" class="p-button-outlined" />
+          <Button variant="success" class="mr-2" @click="openNewTagDialog">
+            <Plus class="w-4 h-4" aria-hidden="true" />
+            New Regex Tag
+          </Button>
+          <div class="flex items-center gap-2">
+            <Input v-model="globalFilterValue" placeholder="Global Search" />
+            <Button variant="outline" size="icon" aria-label="Reset filters" @click="resetFilters">
+              <FilterX class="w-4 h-4" aria-hidden="true" />
+            </Button>
           </div>
         </div>
       </template>
 
-      <Column field="name" header="Name" sortable :style="{ width: '20%' }">
-        <template #body="slotProps">
-          <span
-            :style="{
-              color: slotProps.data.color && slotProps.data.color !== 'fade' ? slotProps.data.color : 'inherit',
-              opacity: slotProps.data.color === 'fade' ? 0.5 : 1,
-            }"
-          >
-            {{ slotProps.data.name }}
+      <template #cell-name="{ data }">
+        <span
+          :style="{
+            color: data.color && data.color !== 'fade' ? data.color : 'inherit',
+            opacity: data.color === 'fade' ? 0.5 : 1,
+          }"
+        >
+          {{ data.name }}
+        </span>
+      </template>
+
+      <template #cell-color="{ data }">
+        <div class="flex items-center">
+          <div
+            v-if="data.color && data.color !== 'fade'"
+            class="w-5 h-5 mr-2 border-surface-800 border rounded-full"
+            :style="{ backgroundColor: data.color }"
+          ></div>
+          <span :style="{ opacity: data.color === 'fade' ? 0.5 : 1 }">
+            {{
+              data.color === "fade"
+                ? "Fade"
+                : data.color
+                  ? data.color.charAt(0).toUpperCase() + data.color.slice(1)
+                  : "No Color"
+            }}
           </span>
-        </template>
-        <template #filter="{ filterModel, filterCallback }">
-          <InputText
-            v-model="filterModel.value"
-            type="text"
-            @input="filterCallback()"
-            class="p-column-filter"
-            placeholder="Search by name"
-          />
-        </template>
-      </Column>
-      <Column field="regex" header="Regex" sortable :style="{ width: '30%' }">
-        <template #filter="{ filterModel, filterCallback }">
-          <InputText
-            v-model="filterModel.value"
-            type="text"
-            @input="filterCallback()"
-            class="p-column-filter"
-            placeholder="Search regex"
-          />
-        </template>
-      </Column>
-      <Column field="color" header="Color" sortable :style="{ width: '15%' }">
-        <template #body="slotProps">
-          <div class="flex items-center">
-            <div
-              v-if="slotProps.data.color && slotProps.data.color !== 'fade'"
-              class="w-5 h-5 mr-2 border-surface-800 border-1 rounded-full"
-              :style="{ backgroundColor: slotProps.data.color }"
-            ></div>
-            <span :style="{ opacity: slotProps.data.color === 'fade' ? 0.5 : 1 }">
-              {{
-                slotProps.data.color === "fade"
-                  ? "Fade"
-                  : slotProps.data.color
-                    ? slotProps.data.color.charAt(0).toUpperCase() + slotProps.data.color.slice(1)
-                    : "No Color"
-              }}
-            </span>
-          </div>
-        </template>
-        <template #filter="{ filterModel, filterCallback }">
-          <InputText
-            v-model="filterModel.value"
-            type="text"
-            @input="filterCallback()"
-            class="p-column-filter"
-            placeholder="Search by color"
-          />
-        </template>
-      </Column>
-      <Column field="hideWork" header="Hide Work" dataType="boolean" sortable :style="{ width: '10%' }">
-        <template #body="slotProps">
-          <i
-            class="pi"
-            :class="{
-              'pi-check-circle text-green-500': slotProps.data.hideWork,
-              'pi-times-circle text-red-400': !slotProps.data.hideWork,
-            }"
-          ></i>
-        </template>
-      </Column>
-      <Column field="hideTag" header="Hide Tag" dataType="boolean" sortable :style="{ width: '10%' }">
-        <template #body="slotProps">
-          <i
-            class="pi"
-            :class="{
-              'pi-check-circle text-green-500': slotProps.data.hideTag,
-              'pi-times-circle text-red-400': !slotProps.data.hideTag,
-            }"
-          ></i>
-        </template>
-      </Column>
-      <Column field="caseInsensitive" header="Case Insensitive" dataType="boolean" sortable :style="{ width: '15%' }">
-        <template #body="slotProps">
-          <i
-            class="pi"
-            :class="{
-              'pi-check-circle text-green-500': slotProps.data.caseInsensitive,
-              'pi-times-circle text-red-400': !slotProps.data.caseInsensitive,
-            }"
-          ></i>
-        </template>
-      </Column>
+        </div>
+      </template>
+
+      <template #cell-hideWork="{ data }">
+        <CircleCheck v-if="data.hideWork" class="w-5 h-5 text-green-500" aria-label="Yes" />
+        <CircleX v-else class="w-5 h-5 text-red-400" aria-label="No" />
+      </template>
+
+      <template #cell-hideTag="{ data }">
+        <CircleCheck v-if="data.hideTag" class="w-5 h-5 text-green-500" aria-label="Yes" />
+        <CircleX v-else class="w-5 h-5 text-red-400" aria-label="No" />
+      </template>
+
+      <template #cell-caseInsensitive="{ data }">
+        <CircleCheck v-if="data.caseInsensitive" class="w-5 h-5 text-green-500" aria-label="Yes" />
+        <CircleX v-else class="w-5 h-5 text-red-400" aria-label="No" />
+      </template>
     </DataTable>
 
-    <Dialog v-model:visible="editDialog" modal header="Edit Regex Tag" :style="{ width: '30rem' }">
-      <div class="p-fluid" v-if="editedTag">
-        <div class="flex flex-col align-items-center gap-3">
+    <Dialog v-model:open="editDialog" title="Edit Regex Tag">
+      <div v-if="editedTag">
+        <div class="flex flex-col gap-3">
           <label for="name" class="font-semibold">Name</label>
-          <InputText id="name" v-model="editedTag.name" class="flex-auto" required />
+          <Input id="name" v-model="editedTag.name" class="w-full" required />
         </div>
-        <div class="flex flex-col align-items-center gap-3 mt-3">
+        <div class="flex flex-col gap-3 mt-3">
           <label for="regex" class="font-semibold">Regex</label>
-          <InputText id="regex" v-model="editedTag.regex" class="flex-auto" required />
+          <Input id="regex" v-model="editedTag.regex" class="w-full" required />
         </div>
-        <div class="flex flex-col align-items-center gap-3 mt-3">
+        <div class="flex flex-col gap-3 mt-3">
           <div class="flex items-center">
             <label for="color" class="font-semibold mr-2">Color</label>
             <div
-              class="w-5 h-5 border-surface-800 border-1 rounded-full"
+              class="w-5 h-5 border-surface-800 border rounded-full"
               :style="{ backgroundColor: editedTag.color || 'transparent' }"
             ></div>
           </div>
           <div class="flex-grow w-full">
             <Select
-              :pt="{ id: 'color' }"
+              id="color"
               v-model="editedTag.color"
               :options="colors"
-              class="w-full"
-              optionLabel="name"
-              optionValue="code"
+              option-label="name"
+              option-value="code"
             />
           </div>
         </div>
-        <div class="flex flex-col align-items-center gap-3 mt-3">
+        <div class="flex flex-col gap-3 mt-3">
           <label class="font-semibold">Options</label>
           <div class="flex-auto">
-            <div class="flex align-items-center gap-2 mb-2">
-              <Checkbox :pt="{ id: 'hideWork' }" v-model="editedTag.hideWork" :binary="true" />
+            <div class="flex items-center gap-2 mb-2">
+              <Checkbox id="hideWork" v-model="editedTag.hideWork" />
               <label for="hideWork">Hide Works</label>
             </div>
-            <div class="flex align-items-center gap-2 mb-2">
-              <Checkbox :pt="{ id: 'hideTag' }" v-model="editedTag.hideTag" :binary="true" />
+            <div class="flex items-center gap-2 mb-2">
+              <Checkbox id="hideTag" v-model="editedTag.hideTag" />
               <label for="hideTag">Hide Tag</label>
             </div>
-            <div class="flex align-items-center gap-2">
-              <Checkbox :pt="{ id: 'caseInsensitive' }" v-model="editedTag.caseInsensitive" :binary="true" />
+            <div class="flex items-center gap-2">
+              <Checkbox id="caseInsensitive" v-model="editedTag.caseInsensitive" />
               <label for="caseInsensitive">Case Insensitive</label>
             </div>
           </div>
         </div>
       </div>
       <template #footer>
-        <div class="flex justify-content-end gap-2 mt-2">
-          <Button label="Cancel" icon="pi pi-times" @click="editDialog = false" class="p-button-text" />
-          <Button label="Save" icon="pi pi-check" @click="saveEditedTag" autofocus />
-        </div>
+        <Button variant="ghost" @click="editDialog = false">
+          <X class="w-4 h-4" aria-hidden="true" />
+          Cancel
+        </Button>
+        <Button autofocus @click="saveEditedTag">
+          <Check class="w-4 h-4" aria-hidden="true" />
+          Save
+        </Button>
       </template>
     </Dialog>
 
-    <Dialog v-model:visible="newTagDialog" modal header="New Regex Tag" :style="{ width: '30rem' }">
-      <span class="p-text-secondary block mb-5">Create a new regex tag.</span>
-      <div class="p-fluid">
-        <div class="flex flex-col align-items-center gap-3 mb-3">
+    <Dialog v-model:open="newTagDialog" title="New Regex Tag" description="Create a new regex tag.">
+      <div>
+        <div class="flex flex-col gap-3 mb-3">
           <label for="newName" class="font-semibold">Name</label>
-          <InputText id="newName" v-model="newTag.name" class="flex-auto" required />
+          <Input id="newName" v-model="newTag.name" class="w-full" required />
         </div>
-        <div class="flex flex-col align-items-center gap-3 mt-3">
+        <div class="flex flex-col gap-3 mt-3">
           <label for="newRegex" class="font-semibold">Regex</label>
-          <InputText id="newRegex" v-model="newTag.regex" class="flex-auto" required />
+          <Input id="newRegex" v-model="newTag.regex" class="w-full" required />
         </div>
-        <div class="flex flex-col align-items-center gap-3 mt-3">
+        <div class="flex flex-col gap-3 mt-3">
           <div class="flex items-center">
-            <label for="color" class="font-semibold mr-2">Color</label>
+            <label for="newColor" class="font-semibold mr-2">Color</label>
             <div
-              class="w-5 h-5 border-surface-800 border-1 rounded-full"
+              class="w-5 h-5 border-surface-800 border rounded-full"
               :style="{ backgroundColor: newTag.color || 'transparent' }"
             ></div>
           </div>
           <div class="flex-grow w-full">
             <Select
-              :pt="{ id: 'color' }"
+              id="newColor"
               v-model="newTag.color"
               :options="colors"
-              class="w-full"
-              optionLabel="name"
-              optionValue="code"
+              option-label="name"
+              option-value="code"
             />
           </div>
         </div>
-        <div class="flex flex-col align-items-center gap-3 mt-3">
+        <div class="flex flex-col gap-3 mt-3">
           <label class="font-semibold">Options</label>
           <div class="flex-auto">
-            <div class="flex align-items-center gap-2 mb-2">
-              <Checkbox :pt="{ id: 'newHideWork' }" v-model="newTag.hideWork" :binary="true" />
+            <div class="flex items-center gap-2 mb-2">
+              <Checkbox id="newHideWork" v-model="newTag.hideWork" />
               <label for="newHideWork">Hide Works</label>
             </div>
-            <div class="flex align-items-center gap-2">
-              <Checkbox :pt="{ id: 'newCaseInsensitive' }" v-model="newTag.caseInsensitive" :binary="true" />
+            <div class="flex items-center gap-2">
+              <Checkbox id="newCaseInsensitive" v-model="newTag.caseInsensitive" />
               <label for="newCaseInsensitive">Case Insensitive</label>
             </div>
-            <div class="flex align-items-center gap-2 mt-2">
-              <Checkbox :pt="{ id: 'newHideTag' }" v-model="newTag.hideTag" :binary="true" />
+            <div class="flex items-center gap-2 mt-2">
+              <Checkbox id="newHideTag" v-model="newTag.hideTag" />
               <label for="newHideTag">Hide Tag</label>
             </div>
           </div>
         </div>
       </div>
       <template #footer>
-        <div class="flex justify-content-end gap-2">
-          <Button label="Cancel" icon="pi pi-times" @click="newTagDialog = false" class="p-button-text" />
-          <Button label="Save" icon="pi pi-check" @click="saveNewTag" autofocus />
-        </div>
+        <Button variant="ghost" @click="newTagDialog = false">
+          <X class="w-4 h-4" aria-hidden="true" />
+          Cancel
+        </Button>
+        <Button autofocus @click="saveNewTag">
+          <Check class="w-4 h-4" aria-hidden="true" />
+          Save
+        </Button>
       </template>
     </Dialog>
   </div>
 </template>
-@src/common/db/Database@src/common/models/RegexTag

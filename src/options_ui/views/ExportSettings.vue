@@ -18,10 +18,11 @@ import {
   setAllSettings,
 } from "@src/common/settings";
 import ExportToggle from "@src/options_ui/components/ExportToggle.vue";
+import { Download, Trash2 } from "@lucide/vue";
 import { saveAs } from "file-saver";
-import Button from "primevue/button";
-import { useToast } from "primevue/usetoast";
 import { ref } from "vue";
+
+import { Button, useToast } from "@src/common/ui";
 
 const toast = useToast();
 const logger = new Logger("ExportImport");
@@ -302,13 +303,10 @@ const wipeData = async () => {
         <ExportToggle v-model="exportSettings" label="Settings" id="exportSettings" />
         <ExportToggle v-model="exportSubscriptions" label="Subscriptions" id="exportSubscriptions" />
         <ExportToggle v-model="exportIgnoreList" label="Ignore list" id="exportIgnoreList" />
-        <Button
-          @click="exportData"
-          icon="pi pi-download"
-          label="Export Data"
-          class="mx-2 mt-2"
-          severity="primary"
-        />
+        <Button class="mx-2 mt-2" @click="exportData">
+          <Download class="w-4 h-4" aria-hidden="true" />
+          Export Data
+        </Button>
       </div>
     </div>
 
@@ -322,13 +320,10 @@ const wipeData = async () => {
         <ExportToggle v-model="wipeSettings" label="Settings" id="wipeSettings" />
         <ExportToggle v-model="wipeSubscriptions" label="Subscriptions" id="wipeSubscriptions" />
         <ExportToggle v-model="wipeIgnoreList" label="Ignore list" id="wipeIgnoreList" />
-        <Button
-          @click="wipeData"
-          icon="pi pi-trash"
-          label="Destroy Data"
-          class="mx-2 mt-2"
-          severity="danger"
-        />
+        <Button variant="danger" class="mx-2 mt-2" @click="wipeData">
+          <Trash2 class="w-4 h-4" aria-hidden="true" />
+          Destroy Data
+        </Button>
       </div>
     </div>
   </div>
