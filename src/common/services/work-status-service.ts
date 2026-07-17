@@ -1,3 +1,4 @@
+import { serverFeaturesEnabled } from "@src/common/build-env";
 import { messaging } from "@src/common/messaging";
 import type { ReadingPosition } from "@src/common/reading-position";
 import {
@@ -16,6 +17,12 @@ const MAX_IDS_PER_REQUEST = 100;
 
 type ModeSettings = Pick<Settings, "connectToServer">;
 
+// Server mode requires both the user setting and a build that ships the
+// server features (SERVER_FEATURES=disabled builds are local-only).
+function useServer(settings: ModeSettings): boolean {
+  return serverFeaturesEnabled && settings.connectToServer;
+}
+
 /**
  * Single door for per-work reading status. With the server connection on,
  * everything goes to the API and local data is neither read nor written;
@@ -29,7 +36,7 @@ export const workStatusService = {
     settings: ModeSettings,
     workIds: string[],
   ): Promise<WorkStatusMap | null> {
-    if (!settings.connectToServer) {
+    if (!useServer(settings)) {
       return messaging.sendMessage("getLocalWorkStatuses", workIds);
     }
 
@@ -90,7 +97,7 @@ export const workStatusService = {
     settings: ModeSettings,
     payload: WorkVisitPayload,
   ): Promise<boolean> {
-    if (!settings.connectToServer) {
+    if (!useServer(settings)) {
       await messaging.sendMessage("recordLocalVisit", {
         workId: payload.workId,
         chapter: payload.currentChapter,
@@ -128,7 +135,7 @@ export const workStatusService = {
     workId: string,
     ignored: boolean,
   ): Promise<void> {
-    if (!settings.connectToServer) {
+    if (!useServer(settings)) {
       await messaging.sendMessage("setLocalIgnored", { workId, ignored });
 
       return;
@@ -154,7 +161,7 @@ export const workStatusService = {
     workId: string,
     subscribed: boolean,
   ): Promise<boolean> {
-    if (!settings.connectToServer) {
+    if (!useServer(settings)) {
       await messaging.sendMessage("setLocalSubscribed", {
         workId,
         subscribed,
@@ -191,7 +198,7 @@ export const workStatusService = {
     workId: string,
     chapter: number,
   ): Promise<{ last_chapter: number; highest_chapter: number }> {
-    if (!settings.connectToServer) {
+    if (!useServer(settings)) {
       const status = await messaging.sendMessage("resetLocalHighestChapter", {
         workId,
         chapter,
@@ -229,7 +236,7 @@ export const workStatusService = {
     position: ReadingPosition,
     keepalive: boolean,
   ): Promise<boolean> {
-    if (!settings.connectToServer) {
+    if (!useServer(settings)) {
       await messaging.sendMessage("setLocalReadingPosition", {
         workId,
         position,

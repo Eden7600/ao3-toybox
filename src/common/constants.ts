@@ -6,3 +6,6 @@ export type Browser = (typeof BROWSERS)[number];
 
 export const ENVIRONMENTS = ["production", "development"] as const;
 export type Environment = (typeof ENVIRONMENTS)[number];
+
+export const SERVER_FEATURES_MODES = ["enabled", "disabled"] as const;
+export type ServerFeaturesMode = (typeof SERVER_FEATURES_MODES)[number];

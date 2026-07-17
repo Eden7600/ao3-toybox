@@ -4,6 +4,7 @@ import {
   type RouteRecordRaw,
 } from "vue-router";
 
+import { serverFeaturesEnabled } from "@src/common/build-env";
 import { isDevBuild } from "./build-env";
 
 // Import your views here
@@ -32,9 +33,9 @@ const routes: RouteRecordRaw[] = [
   { path: "/common-tags", name: "common-tags", component: CommonTagsView },
   { path: "/regex-tags", name: "regex-tags", component: RegexTagsView },
   { path: "/export", name: "export", component: ExportSettingsView },
-  // Offline-first release: server page exists only in dev builds; in
-  // production /server falls through to the catch-all below
-  ...(isDevBuild
+  // Offline-first release: server page exists only in dev builds that ship
+  // the server features; otherwise /server falls through to the catch-all
+  ...(isDevBuild && serverFeaturesEnabled
     ? [{ path: "/server", name: "server", component: ServerSettingsView }]
     : []),
   { path: "/:pathMatch(.*)*", redirect: "/welcome" },

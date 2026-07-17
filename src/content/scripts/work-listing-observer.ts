@@ -1,3 +1,4 @@
+import { serverFeaturesEnabled } from "@src/common/build-env";
 import { cleanTagUrl } from "@src/common/clean-urls";
 import { markdownService } from "@src/common/markdown";
 import {
@@ -29,7 +30,7 @@ export default class WorkListingObserver extends ContentScript {
   private scrapedWorks: WorkData[] = [];
 
   getEnabled(): boolean {
-    if (!this.settings.connectToServer) {
+    if (!serverFeaturesEnabled || !this.settings.connectToServer) {
       return false;
     }
 

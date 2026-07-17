@@ -35,6 +35,9 @@ jobs:
 
       - name: Build
         run: pnpm build:${{ matrix.mode }}:${{ matrix.browser }}
+        env:
+          # CI builds ship without the extension's server-sync features
+          SERVER_FEATURES: disabled
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

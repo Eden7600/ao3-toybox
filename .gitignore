@@ -25,3 +25,9 @@ Thumbs.db
 
 codeqldb
 codeql-results
+
+# Other stuff
+.claude
+.agents
+.vscode
+openspec

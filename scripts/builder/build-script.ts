@@ -41,6 +41,7 @@ export async function buildScript(args: Args, entry: string, outPath: string) {
     define: {
       "process.env.NODE_ENV": `"${args.environment}"`,
       "process.env.BROWSER": `"${args.browser}"`,
+      "process.env.SERVER_FEATURES": `"${args.serverFeatures}"`,
     },
   };
 

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from "vue";
+
+import { serverFeaturesEnabled } from "@src/common/build-env";
 import type { Settings } from "@src/common/settings";
 
 type ToggleKey =
@@ -71,32 +74,32 @@ const toggle = (key: ToggleKey) => {
 
   void props.update({ [key]: !props.settings[key] });
 };
+
+const serverConnected = computed(() =>
+  Boolean(
+    serverFeaturesEnabled &&
+      props.settings?.connectToServer &&
+      props.settings?.apiToken,
+  ),
+);
 </script>
 
 <template>
-  <!-- Connection chip -->
-  <div class="px-4 pb-3">
+  <!-- Connection chip; server-less builds are always local, so no chip -->
+  <div v-if="serverFeaturesEnabled" class="px-4 pb-3">
     <span
       class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full border"
       :class="
-        settings?.connectToServer && settings?.apiToken
+        serverConnected
           ? 'border-green-700 text-green-400 bg-green-950/40'
           : 'border-surface-700 text-gray-400 bg-surface-900'
       "
     >
       <span
         class="w-1.5 h-1.5 rounded-full"
-        :class="
-          settings?.connectToServer && settings?.apiToken
-            ? 'bg-green-400'
-            : 'bg-gray-500'
-        "
+        :class="serverConnected ? 'bg-green-400' : 'bg-gray-500'"
       ></span>
-      {{
-        settings?.connectToServer && settings?.apiToken
-          ? "Server connected"
-          : "Local mode"
-      }}
+      {{ serverConnected ? "Server connected" : "Local mode" }}
     </span>
   </div>
 

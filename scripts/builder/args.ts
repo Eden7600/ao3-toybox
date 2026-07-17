@@ -3,15 +3,18 @@ import {
   BROWSERS,
   COMMANDS,
   ENVIRONMENTS,
+  SERVER_FEATURES_MODES,
   type Browser,
   type Command,
   type Environment,
+  type ServerFeaturesMode,
 } from "../../src/common/constants";
 
 export type Args = {
   command: Command;
   environment: Environment;
   browser: Browser;
+  serverFeatures: ServerFeaturesMode;
 };
 
 export function parseCommandArgs(): Args {
@@ -31,9 +34,15 @@ export function parseCommandArgs(): Args {
   if (!ENVIRONMENTS.includes(environment))
     throw new Error(`Invalid environment: ${environment}`);
 
+  process.env.SERVER_FEATURES ??= "enabled";
+  const serverFeatures = process.env.SERVER_FEATURES as ServerFeaturesMode;
+  if (!SERVER_FEATURES_MODES.includes(serverFeatures))
+    throw new Error(`Invalid SERVER_FEATURES value: ${serverFeatures}`);
+
   return {
     command: argv[0] as Command,
     environment,
     browser: process.env.BROWSER as Browser,
+    serverFeatures,
   };
 }

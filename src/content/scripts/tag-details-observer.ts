@@ -1,10 +1,11 @@
+import { serverFeaturesEnabled } from "@src/common/build-env";
 import { parseTagPage, type ParsedTagRef } from "@src/common/tag-page";
 import { TagAliasStatus, TagType } from "@src/types/tags";
 import { ContentScript } from "../content-script";
 
 export default class TagDetailsObserver extends ContentScript {
   getEnabled(): boolean {
-    if (!this.settings.connectToServer) {
+    if (!serverFeaturesEnabled || !this.settings.connectToServer) {
       return false;
     }
 

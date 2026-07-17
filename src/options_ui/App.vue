@@ -4,6 +4,7 @@ import Toast from "primevue/toast";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
+import { serverFeaturesEnabled } from "@src/common/build-env";
 import { isDevBuild } from "./build-env";
 import NavItem from "./components/NavItem.vue";
 
@@ -43,7 +44,8 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Import / Export", to: "/export", icon: "pi pi-file-import" },
       // Offline-first release: the server page only exists in dev builds
-      ...(isDevBuild
+      // that ship the server features
+      ...(isDevBuild && serverFeaturesEnabled
         ? [{ label: "Server", to: "/server", icon: "pi pi-server" }]
         : []),
     ],
