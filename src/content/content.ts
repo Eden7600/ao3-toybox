@@ -2,7 +2,13 @@ import { Logger } from "@src/common/logger";
 const logger = new Logger("CTS-Root");
 
 import type { Browser } from "@src/common/constants";
-import { getAllSettings } from "@src/common/settings";
+import { sameLiveContentSettings } from "@src/common/live-settings";
+import {
+  getAllSettings,
+  normalizeStoredSettings,
+  type Settings,
+  type StoredSettings,
+} from "@src/common/settings";
 import { ContentScript, type ContentScriptModule } from "./content-script";
 import { ContentScriptManager } from "./content-script-manager";
 
@@ -53,6 +59,8 @@ async function start(): Promise<void> {
         `Failed to trigger content scripts: ${error instanceof Error ? error.message : String(error)}`,
       );
     });
+
+    watchSettings(settings);
   } catch (error) {
     logger.error(
       `Failed to start PageProcessor module: ${error instanceof Error ? error.message : String(error)}`,
@@ -60,6 +68,40 @@ async function start(): Promise<void> {
   }
 
   observer.observe(document.body, { attributes: true });
+}
+
+/**
+ * Live settings: changes from the popup or options page land in storage;
+ * every script gets the fresh snapshot, and the live-reapply scripts
+ * undo and redo their page work so the change shows without a reload.
+ * Theme-only changes are the injector's job and skip the reapply.
+ */
+function watchSettings(initial: Settings): void {
+  let current = initial;
+
+  const api = typeof chrome === "undefined" ? browser : chrome;
+
+  api.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "local" || !("settings" in changes)) return;
+
+    const next = normalizeStoredSettings(
+      changes.settings.newValue as StoredSettings | null,
+    );
+    const reapplyNeeded = !sameLiveContentSettings(current, next);
+
+    current = next;
+    scriptManager.updateAllSettings(next);
+
+    if (!reapplyNeeded) return;
+
+    logger.log("Live settings change detected, reapplying");
+
+    scriptManager.reapplyLive().catch((error: unknown) => {
+      logger.error(
+        `Failed to reapply live scripts: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    });
+  });
 }
 
 void start();

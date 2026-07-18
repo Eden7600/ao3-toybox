@@ -1,10 +1,21 @@
 import { extractStatNumber } from "@src/common/blurb-stats";
-import { markWorkForHiding } from "@src/common/hide-modes";
+import {
+  clearHideSourceMarks,
+  markWorkForHiding,
+} from "@src/common/hide-modes";
 import { ContentScript } from "../content-script";
 
 export default class PodficFilter extends ContentScript {
   private static get WORK_SELECTOR(): string {
     return "li.work.blurb.group";
+  }
+
+  override get supportsLiveReapply(): boolean {
+    return true;
+  }
+
+  async onSettingsReset(): Promise<void> {
+    clearHideSourceMarks(["podfic"]);
   }
 
   getEnabled(): boolean {

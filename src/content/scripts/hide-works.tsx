@@ -1,4 +1,5 @@
 import {
+  getHideReasons,
   getHideSources,
   isWorkHideExempt,
   resolveHideMode,
@@ -115,6 +116,36 @@ export default class HideWorks extends ContentScript {
     this.processMarkedWorks();
   }
 
+  override get supportsLiveReapply(): boolean {
+    return true;
+  }
+
+  /**
+   * Live settings change: un-hide every processed work and drop its
+   * placeholder so processMarkedWorks can re-resolve from scratch under
+   * the new modes. Exempt pins ("exempt") are left alone — exemption is
+   * decided by the async subscription status, not by these settings.
+   */
+  async onSettingsReset(): Promise<void> {
+    document.querySelectorAll<HTMLElement>("li.work.blurb").forEach((work) => {
+      if (work.dataset.toyboxHideProcessed !== "true") {
+        return;
+      }
+
+      delete work.dataset.toyboxHideProcessed;
+      work.style.display = "";
+
+      const placeholder = work.previousElementSibling;
+
+      if (
+        placeholder instanceof HTMLElement &&
+        placeholder.dataset.toyboxHideReason === "true"
+      ) {
+        placeholder.remove();
+      }
+    });
+  }
+
   private processMarkedWorks(): void {
     // Find all works that have been marked for hiding
     const allWorks = document.querySelectorAll<HTMLElement>("li.work.blurb");
@@ -124,22 +155,8 @@ export default class HideWorks extends ContentScript {
       const shouldHide = work.dataset.toyboxHide === "true";
 
       if (shouldHide) {
-        // Parse reasons from data attribute
-        let reasons: string[] = ["Hidden work"];
-
-        const reasonData = work.dataset.toyboxHideReason;
-
-        if (reasonData) {
-          try {
-            const parsed: unknown = JSON.parse(reasonData);
-
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              reasons = parsed as string[];
-            }
-          } catch (error) {
-            this.logger.error("Failed to parse hide reasons", error);
-          }
-        }
+        const recorded = getHideReasons(work);
+        const reasons = recorded.length > 0 ? recorded : ["Hidden work"];
 
         worksToHide.push({ element: work, reasons });
       }

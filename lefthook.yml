@@ -1,10 +1,25 @@
+commit-msg:
+  jobs:
+    - name: conventional-commit
+      run: node scripts/check-commit-msg.mjs {1}
+
 pre-commit:
+  parallel: true
   jobs:
     - name: version-bump
       run: node scripts/check-version-bump.mjs
       skip:
         - merge
         - rebase
+    - name: lint
+      run: pnpm eslint --no-warn-ignored {staged_files}
+      glob: "*.{js,mjs,cjs,ts,mts,tsx,vue}"
+    - name: types
+      run: pnpm types
+      glob: "*.{ts,mts,tsx,vue}"
+    - name: test
+      run: pnpm vitest related --run {staged_files}
+      glob: "*.{js,mjs,ts,mts,tsx,vue}"
 
 pre-push:
   parallel: true

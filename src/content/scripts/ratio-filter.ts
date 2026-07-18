@@ -3,12 +3,24 @@ import {
   formatKudosPerHit,
   formatRatio,
 } from "@src/common/blurb-stats";
-import { markWorkForHiding } from "@src/common/hide-modes";
+import {
+  clearHideSourceMarks,
+  markWorkForHiding,
+} from "@src/common/hide-modes";
 import { ContentScript } from "../content-script";
 
 export default class RatioFilter extends ContentScript {
   private static get WORK_SELECTOR(): string {
     return "li.work.blurb.group";
+  }
+
+  override get supportsLiveReapply(): boolean {
+    return true;
+  }
+
+  async onSettingsReset(): Promise<void> {
+    // Marks from the old thresholds are stale; re-mark from scratch
+    clearHideSourceMarks(["kudos-hits", "words-chapter"]);
   }
 
   getEnabled(): boolean {

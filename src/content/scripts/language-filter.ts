@@ -1,9 +1,21 @@
-import { markWorkForHiding } from "@src/common/hide-modes";
+import {
+  clearHideSourceMarks,
+  markWorkForHiding,
+} from "@src/common/hide-modes";
 import { ContentScript } from "../content-script";
 
 export default class LanguageFilter extends ContentScript {
   private static get WORK_SELECTOR(): string {
     return "li.work.blurb.group";
+  }
+
+  override get supportsLiveReapply(): boolean {
+    return true;
+  }
+
+  async onSettingsReset(): Promise<void> {
+    // Marks from the old allowlist are stale; re-mark from scratch
+    clearHideSourceMarks(["language"]);
   }
 
   getEnabled(): boolean {

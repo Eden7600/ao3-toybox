@@ -18,6 +18,31 @@ export default class RatioStats extends ContentScript {
     return "li.work.blurb.group";
   }
 
+  /** Every stat class this script may inject, for the live-reset sweep. */
+  private static get STAT_CLASSES(): string[] {
+    return [
+      "toybox-kudos-hits",
+      "toybox-words-chapter",
+      "toybox-reading-time",
+      "toybox-finish-at",
+    ];
+  }
+
+  override get supportsLiveReapply(): boolean {
+    return true;
+  }
+
+  /** Remove every injected stat pair; onProcess re-injects per settings. */
+  async onSettingsReset(): Promise<void> {
+    const selector = RatioStats.STAT_CLASSES.map(
+      (className) => `.toybox-stat.${className}`,
+    ).join(", ");
+
+    document.querySelectorAll(selector).forEach((element) => {
+      element.remove();
+    });
+  }
+
   getEnabled(): boolean {
     return (
       this.settings.showKudosPerHitRatio ||

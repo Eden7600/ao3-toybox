@@ -1,4 +1,5 @@
 import type { Logger } from "@src/common/logger";
+import type { Settings } from "@src/common/settings";
 import type { ContentScript } from "./content-script";
 
 export class ContentScriptManager {
@@ -29,10 +30,51 @@ export class ContentScriptManager {
       return enabled;
     });
 
+    await this.runPhases(enabledScripts);
+  }
+
+  /** Push a fresh settings snapshot to every script. */
+  updateAllSettings(settings: Settings): void {
+    this.scripts.forEach((script) => {
+      script.updateSettings(settings);
+    });
+  }
+
+  /**
+   * Live settings change: scripts that support reapply undo their page
+   * work first (all of them — a feature just turned off must clean up),
+   * then the currently-enabled ones run their phases again. Phase order
+   * is preserved so marking scripts run before the hide processor.
+   */
+  async reapplyLive(): Promise<void> {
+    const liveScripts = this.scripts.filter(
+      (script) => script.supportsLiveReapply,
+    );
+
+    this.logger.log(
+      `Reapplying ${String(liveScripts.length)} live scripts after settings change`,
+    );
+
+    await Promise.all(
+      liveScripts.map(async (script) => {
+        try {
+          await script.onSettingsReset?.();
+        } catch (error) {
+          this.logger.error(
+            `Error in onSettingsReset for script ${script.constructor.name}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      }),
+    );
+
+    await this.runPhases(liveScripts.filter((script) => script.getEnabled()));
+  }
+
+  private async runPhases(scripts: ContentScript[]): Promise<void> {
     const runPhase = async (
       phase: "onInitialize" | "onPreProcess" | "onProcess" | "onPostProcess",
     ) => {
-      const promises = enabledScripts
+      const promises = scripts
         .filter((script) => script[phase])
         .map((script) =>
           (script[phase] as () => Promise<void>)().catch((error: unknown) => {

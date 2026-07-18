@@ -1,5 +1,5 @@
 /// <reference types="chrome" />
-import { isThemeOnlyPatch } from "@src/ao3_theme_injector/theme-options";
+import { isLiveOnlyPatch } from "@src/common/live-settings";
 import {
   getAllSettings,
   setSetting,
@@ -110,9 +110,10 @@ export function usePopupSettings(): PopupSettings {
         ),
       );
 
-      // Theme settings hot-apply everywhere: the injector in each open
-      // tab watches storage and swaps its stylesheet — no reload needed.
-      if (!isThemeOnlyPatch(patch)) {
+      // Live settings hot-apply everywhere: the theme injector swaps its
+      // stylesheet and the content root reapplies its live scripts when
+      // storage changes — no reload needed for those keys.
+      if (!isLiveOnlyPatch(patch)) {
         scheduleReload();
       }
     } catch (error) {

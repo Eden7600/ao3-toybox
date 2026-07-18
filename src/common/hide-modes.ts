@@ -73,49 +73,93 @@ export function resolveHideMode(
   return sources.length === 0 ? "collapse" : "none";
 }
 
-function appendToJsonArray(
-  existing: string | undefined,
-  value: string,
-): string {
-  let values: string[] = [];
+type HideEntry = { source: HideSource; reason: string };
 
-  if (existing) {
-    try {
-      const parsed: unknown = JSON.parse(existing);
+/**
+ * Parse the per-source mark entries recorded on a blurb. The markers are
+ * page-lifetime only (data attributes, never persisted), so there is no
+ * legacy format to migrate — corrupt data starts a fresh list.
+ */
+function getHideEntries(work: HTMLElement): HideEntry[] {
+  const data = work.dataset.toyboxHideEntries;
 
-      if (Array.isArray(parsed)) {
-        values = parsed as string[];
-      }
-    } catch {
-      // Corrupt marker data; start a fresh array
-    }
+  if (!data) {
+    return [];
   }
 
-  if (!values.includes(value)) {
-    values.push(value);
+  try {
+    const parsed: unknown = JSON.parse(data);
+
+    return Array.isArray(parsed) ? (parsed as HideEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function setHideEntries(work: HTMLElement, entries: HideEntry[]): void {
+  if (entries.length === 0) {
+    delete work.dataset.toyboxHide;
+    delete work.dataset.toyboxHideEntries;
+
+    return;
   }
 
-  return JSON.stringify(values);
+  work.dataset.toyboxHide = "true";
+  work.dataset.toyboxHideEntries = JSON.stringify(entries);
 }
 
 /**
- * Mark a work blurb for the hide pipeline, recording both the
- * human-readable reason and the machine-readable source.
+ * Mark a work blurb for the hide pipeline, recording the human-readable
+ * reason keyed to its machine-readable source so a filter can later
+ * retract exactly its own marks (clearWorkHideSources).
  */
 export function markWorkForHiding(
   work: HTMLElement,
   source: HideSource,
   reason: string,
 ): void {
-  work.dataset.toyboxHide = "true";
-  work.dataset.toyboxHideReason = appendToJsonArray(
-    work.dataset.toyboxHideReason,
-    reason,
+  const entries = getHideEntries(work);
+
+  if (
+    !entries.some((entry) => entry.source === source && entry.reason === reason)
+  ) {
+    entries.push({ source, reason });
+  }
+
+  setHideEntries(work, entries);
+}
+
+/**
+ * Retract every mark the given sources contributed — used by live
+ * settings changes, where a filter re-marks from scratch under its new
+ * configuration. Clears the hide flag entirely when nothing remains.
+ */
+export function clearWorkHideSources(
+  work: HTMLElement,
+  sources: HideSource[],
+): void {
+  setHideEntries(
+    work,
+    getHideEntries(work).filter((entry) => !sources.includes(entry.source)),
   );
-  work.dataset.toyboxHideSources = appendToJsonArray(
-    work.dataset.toyboxHideSources,
-    source,
-  );
+}
+
+/** Clear the given sources' marks from every blurb on the page. */
+export function clearHideSourceMarks(
+  sources: HideSource[],
+  root: ParentNode = document,
+): void {
+  root.querySelectorAll<HTMLElement>("li.work.blurb").forEach((work) => {
+    clearWorkHideSources(work, sources);
+  });
+}
+
+/**
+ * Read the reasons recorded on a marked blurb, deduplicated in marking
+ * order (two sources can contribute the same wording).
+ */
+export function getHideReasons(work: HTMLElement): string[] {
+  return [...new Set(getHideEntries(work).map((entry) => entry.reason))];
 }
 
 /**
@@ -163,20 +207,9 @@ export function restoreExemptWork(work: HTMLElement): boolean {
 }
 
 /**
- * Read the sources recorded on a marked blurb; empty for legacy markers.
+ * Read the sources recorded on a marked blurb; empty for markers set
+ * without entries (treated as unconditional by resolveHideMode).
  */
 export function getHideSources(work: HTMLElement): HideSource[] {
-  const data = work.dataset.toyboxHideSources;
-
-  if (!data) {
-    return [];
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(data);
-
-    return Array.isArray(parsed) ? (parsed as HideSource[]) : [];
-  } catch {
-    return [];
-  }
+  return [...new Set(getHideEntries(work).map((entry) => entry.source))];
 }

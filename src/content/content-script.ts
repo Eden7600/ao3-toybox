@@ -19,6 +19,23 @@ export abstract class ContentScript {
 
   abstract getEnabled(): boolean;
 
+  /** Swap in a fresh settings snapshot (live settings changes). */
+  updateSettings(settings: Settings): void {
+    this.settings = settings;
+  }
+
+  /**
+   * Scripts that can undo and redo their page work without a reload
+   * return true; on a live settings change the manager calls
+   * onSettingsReset on them and then re-runs their phases.
+   */
+  get supportsLiveReapply(): boolean {
+    return false;
+  }
+
+  // Undo page work before a live reapply; runs with the new settings already applied.
+  onSettingsReset?(): Promise<void>;
+
   // This stage is when we scrape/read data from the page. No modifications are made to the page at this stage.
   onInitialize?(): Promise<void>;
   // This is where we make small modifications to the page, such as adding / removing attributes.

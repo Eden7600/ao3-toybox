@@ -1,7 +1,10 @@
 import type { CommonTagResponse } from "@src/background/handlers/common-tag-handler";
 import type { RegexTagResponse } from "@src/background/handlers/regex-tag-handler";
 import { Color } from "@src/common/color";
-import { markWorkForHiding } from "@src/common/hide-modes";
+import {
+  clearHideSourceMarks,
+  markWorkForHiding,
+} from "@src/common/hide-modes";
 import { messaging } from "@src/common/messaging";
 import { countTagColors } from "@src/common/tag-color-summary";
 import { ContentScript } from "../content-script";
@@ -86,6 +89,55 @@ export default class TagHighlighter extends ContentScript {
     } catch (error) {
       this.logger.error("Error in process:", error);
     }
+  }
+
+  override get supportsLiveReapply(): boolean {
+    return true;
+  }
+
+  /**
+   * Live settings change: put every touched tag back to its stock state
+   * (styles, alias names, hidden-tag display), drop the color summaries,
+   * retract this script's hide marks, and clear the processed guard so a
+   * re-run starts from a clean page. The tag config is refetched from the
+   * background on the re-run, so config edits land too.
+   */
+  async onSettingsReset(): Promise<void> {
+    document.body.removeAttribute(TagHighlighter.PROCESSED_ATTRIBUTE);
+
+    document
+      .querySelectorAll<HTMLElement>("[data-toybox-highlighted]")
+      .forEach((tag) => {
+        tag.style.backgroundColor = "";
+        tag.style.color = "";
+        tag.style.opacity = "";
+        delete tag.dataset.toyboxHighlighted;
+      });
+
+    document
+      .querySelectorAll<HTMLElement>("[data-toybox-original-name]")
+      .forEach((tag) => {
+        tag.textContent = tag.dataset.toyboxOriginalName ?? tag.textContent;
+        delete tag.dataset.toyboxOriginalName;
+      });
+
+    document
+      .querySelectorAll<HTMLElement>("a.tag[data-toybox-hide-tag]")
+      .forEach((tag) => {
+        tag.style.display = "";
+        delete tag.dataset.toyboxHideTag;
+      });
+
+    document
+      .querySelectorAll(".toybox-stat.toybox-tag-colors")
+      .forEach((element) => {
+        element.remove();
+      });
+
+    clearHideSourceMarks(["excluded-tags"]);
+
+    this.commonTagsMap.clear();
+    this.regexTagsMap.clear();
   }
 
   private async collectRegexTags(): Promise<RegexTagResponse[]> {
@@ -282,20 +334,12 @@ export default class TagHighlighter extends ContentScript {
     const commonTag = this.commonTagsMap.get(tag);
 
     if (commonTag?.color) {
-      if (commonTag.color === "fade") {
-        tagElement.style.backgroundColor = "";
-        tagElement.style.color = "";
-        tagElement.style.opacity = "0.5";
-      } else {
-        tagElement.style.backgroundColor = Color.getBackgroundColor(
-          commonTag.color,
-        );
-        tagElement.style.color = Color.getForegroundColor(commonTag.color);
-        tagElement.style.opacity = "";
-      }
+      this.styleTag(tagElement, commonTag.color);
 
-      // Update the text content to the real name if it's an alias
+      // Update the text content to the real name if it's an alias; keep
+      // the original so a live settings reset can restore it
       if (commonTag.realName !== tag) {
+        tagElement.dataset.toyboxOriginalName ??= tag;
         tagElement.textContent = commonTag.realName;
       }
 
@@ -306,21 +350,26 @@ export default class TagHighlighter extends ContentScript {
     const regexTag = this.regexTagsMap.get(tag);
 
     if (regexTag?.color) {
-      if (regexTag.color === "fade") {
-        tagElement.style.backgroundColor = "";
-        tagElement.style.color = "";
-        tagElement.style.opacity = "0.5";
-      } else {
-        tagElement.style.backgroundColor = Color.getBackgroundColor(
-          regexTag.color,
-        );
-        tagElement.style.color = Color.getForegroundColor(regexTag.color);
-        tagElement.style.opacity = "";
-      }
+      this.styleTag(tagElement, regexTag.color);
 
       return regexTag.color;
     }
 
     return null;
+  }
+
+  /** Inline-styles one tag, marked so onSettingsReset can find it. */
+  private styleTag(tagElement: HTMLAnchorElement, color: string): void {
+    if (color === "fade") {
+      tagElement.style.backgroundColor = "";
+      tagElement.style.color = "";
+      tagElement.style.opacity = "0.5";
+    } else {
+      tagElement.style.backgroundColor = Color.getBackgroundColor(color);
+      tagElement.style.color = Color.getForegroundColor(color);
+      tagElement.style.opacity = "";
+    }
+
+    tagElement.dataset.toyboxHighlighted = "true";
   }
 }

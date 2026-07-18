@@ -1,5 +1,8 @@
 import {
+  clearHideSourceMarks,
+  clearWorkHideSources,
   defaultHideModes,
+  getHideReasons,
   getHideSources,
   isWorkHideExempt,
   markWorkForHiding,
@@ -98,9 +101,7 @@ describe("markWorkForHiding", () => {
     markWorkForHiding(work, "ignored", "Ignored on server");
 
     expect(work.dataset.toyboxHide).toBe("true");
-    expect(JSON.parse(work.dataset.toyboxHideReason ?? "[]")).toEqual([
-      "Ignored on server",
-    ]);
+    expect(getHideReasons(work)).toEqual(["Ignored on server"]);
     expect(getHideSources(work)).toEqual(["ignored"]);
   });
 
@@ -108,7 +109,7 @@ describe("markWorkForHiding", () => {
     markWorkForHiding(work, "excluded-tags", "Contains excluded tag: Foo");
     markWorkForHiding(work, "language", "Language not allowed: Klingon");
 
-    expect(JSON.parse(work.dataset.toyboxHideReason ?? "[]")).toEqual([
+    expect(getHideReasons(work)).toEqual([
       "Contains excluded tag: Foo",
       "Language not allowed: Klingon",
     ]);
@@ -119,25 +120,78 @@ describe("markWorkForHiding", () => {
     markWorkForHiding(work, "ignored", "Ignored on server");
     markWorkForHiding(work, "ignored", "Ignored on server");
 
-    expect(JSON.parse(work.dataset.toyboxHideReason ?? "[]")).toEqual([
-      "Ignored on server",
-    ]);
+    expect(getHideReasons(work)).toEqual(["Ignored on server"]);
     expect(getHideSources(work)).toEqual(["ignored"]);
   });
 
-  it("recovers from corrupt marker data", () => {
-    work.dataset.toyboxHideReason = "not json";
-    markWorkForHiding(work, "fandom", "Too many fandoms");
+  it("keeps a source's distinct reasons and reports it once", () => {
+    markWorkForHiding(work, "excluded-tags", "Contains excluded tag: Foo");
+    markWorkForHiding(work, "excluded-tags", "Contains excluded tag: Bar");
 
-    expect(JSON.parse(work.dataset.toyboxHideReason)).toEqual([
-      "Too many fandoms",
+    expect(getHideReasons(work)).toEqual([
+      "Contains excluded tag: Foo",
+      "Contains excluded tag: Bar",
     ]);
+    expect(getHideSources(work)).toEqual(["excluded-tags"]);
   });
 
-  it("returns no sources for legacy markers", () => {
+  it("recovers from corrupt marker data", () => {
+    work.dataset.toyboxHideEntries = "not json";
+    markWorkForHiding(work, "fandom", "Too many fandoms");
+
+    expect(getHideReasons(work)).toEqual(["Too many fandoms"]);
+  });
+
+  it("returns no sources for markers set without entries", () => {
     work.dataset.toyboxHide = "true";
 
     expect(getHideSources(work)).toEqual([]);
+    expect(getHideReasons(work)).toEqual([]);
+  });
+});
+
+describe("clearWorkHideSources", () => {
+  let work: HTMLElement;
+
+  beforeEach(() => {
+    work = document.createElement("li");
+    work.className = "work blurb";
+    document.body.replaceChildren(work);
+  });
+
+  it("retracts only the given sources", () => {
+    markWorkForHiding(work, "word-count", "Word count too low");
+    markWorkForHiding(work, "ignored", "Ignored on server");
+
+    clearWorkHideSources(work, ["word-count"]);
+
+    expect(getHideSources(work)).toEqual(["ignored"]);
+    expect(getHideReasons(work)).toEqual(["Ignored on server"]);
+    expect(work.dataset.toyboxHide).toBe("true");
+  });
+
+  it("drops the hide flag entirely when nothing remains", () => {
+    markWorkForHiding(work, "language", "Language not allowed: Klingon");
+
+    clearWorkHideSources(work, ["language"]);
+
+    expect(work.dataset.toyboxHide).toBeUndefined();
+    expect(work.dataset.toyboxHideEntries).toBeUndefined();
+  });
+
+  it("clears across every blurb on the page", () => {
+    const other = document.createElement("li");
+    other.className = "work blurb";
+    document.body.appendChild(other);
+
+    markWorkForHiding(work, "podfic", "Podfic in title");
+    markWorkForHiding(other, "podfic", "Podfic in summary");
+    markWorkForHiding(other, "fandom", "Too many fandoms");
+
+    clearHideSourceMarks(["podfic"]);
+
+    expect(work.dataset.toyboxHide).toBeUndefined();
+    expect(getHideSources(other)).toEqual(["fandom"]);
   });
 });
 

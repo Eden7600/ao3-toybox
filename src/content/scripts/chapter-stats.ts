@@ -31,6 +31,23 @@ export default class ChapterStats extends ContentScript {
     return this.settings.enableChapterStats && isWorkPage();
   }
 
+  override get supportsLiveReapply(): boolean {
+    return true;
+  }
+
+  /** Remove every stat line and per-chapter guard; onProcess re-injects. */
+  async onSettingsReset(): Promise<void> {
+    document.querySelectorAll(".toybox-chapter-stats").forEach((line) => {
+      line.remove();
+    });
+
+    document
+      .querySelectorAll<HTMLElement>("[data-toybox-chapter-stats]")
+      .forEach((body) => {
+        delete body.dataset.toyboxChapterStats;
+      });
+  }
+
   async onProcess(): Promise<void> {
     const chapterBodies = collectChapterBodies(
       document,
