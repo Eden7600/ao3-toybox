@@ -163,15 +163,6 @@ const serverConnected = computed(() =>
     </button>
   </div>
 
-  <!-- Apply hint -->
-  <div class="px-4 py-2.5 border-t border-surface-800">
-    <span class="text-[11px] text-gray-500 leading-snug">
-      Theme changes apply to open tabs instantly. Other changes reload this
-      tab automatically — background AO3 tabs pick them up on their next
-      reload
-    </span>
-  </div>
-
   <!-- Footer -->
   <div class="p-3 border-t border-surface-800">
     <button
