@@ -68,7 +68,7 @@ const comparison = computed(() => {
 
     <div v-else-if="phase === 'reading'">
       <blockquote
-        class="p-4 mb-3 bg-surface-800 rounded-lg text-gray-200 leading-relaxed"
+        class="p-4 mb-3 bg-surface-800 rounded-lg text-gray-200 text-lg leading-relaxed"
       >
         {{ PASSAGE }}
       </blockquote>
