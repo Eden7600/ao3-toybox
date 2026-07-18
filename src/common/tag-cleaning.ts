@@ -13,10 +13,12 @@ export function cleanTagName(
 ): string {
   let cleaned = name;
 
-  // Remove text in parentheses at the end of the tag (fandom
-  // discriminators), but never empty the tag entirely
+  // Remove fandom discriminators: parentheticals at the end of the tag, or —
+  // in relationship tags like "The Convict | Simon (Iron Lung)/Ryland Grace" —
+  // at the end of any participant segment (before a "/" or " & " separator).
+  // Never empty the tag entirely.
   if (options.removeFandomDiscriminator) {
-    const withoutParens = cleaned.replace(/\s*\([^)]+\)\s*$/, "");
+    const withoutParens = cleaned.replace(/\s*\([^)]+\)(?=\s*(?:[/&]|$))/g, "");
 
     if (withoutParens.trim().length > 0) {
       cleaned = withoutParens;

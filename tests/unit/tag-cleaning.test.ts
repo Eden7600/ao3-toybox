@@ -52,6 +52,33 @@ describe("cleanTagName", () => {
     );
   });
 
+  it("removes discriminators from the first side of a relationship tag", () => {
+    expect(
+      cleanTagName("The Convict | Simon (Iron Lung)/Ryland Grace", {
+        ...neither,
+        removeFandomDiscriminator: true,
+      }),
+    ).toBe("The Convict | Simon/Ryland Grace");
+  });
+
+  it("removes discriminators from both sides of a relationship tag", () => {
+    expect(
+      cleanTagName(
+        "The Convict | Simon (Iron Lung)/Ryland Grace (Project Hail Mary)",
+        { ...neither, removeFandomDiscriminator: true },
+      ),
+    ).toBe("The Convict | Simon/Ryland Grace");
+  });
+
+  it("removes discriminators around an '&' relationship separator", () => {
+    expect(
+      cleanTagName("Sam Winchester (Supernatural) & Max (Camp Camp)", {
+        ...neither,
+        removeFandomDiscriminator: true,
+      }),
+    ).toBe("Sam Winchester & Max");
+  });
+
   it("leaves mid-tag parentheses alone", () => {
     expect(cleanTagName("Alternate Universe (sort of) Canon", both)).toBe(
       "Alternate Universe (sort of) Canon",
