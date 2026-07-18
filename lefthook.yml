@@ -1,0 +1,17 @@
+pre-commit:
+  jobs:
+    - name: version-bump
+      run: node scripts/check-version-bump.mjs
+      skip:
+        - merge
+        - rebase
+
+pre-push:
+  parallel: true
+  jobs:
+    - name: lint
+      run: pnpm lint
+    - name: types
+      run: pnpm types
+    - name: test
+      run: pnpm test
