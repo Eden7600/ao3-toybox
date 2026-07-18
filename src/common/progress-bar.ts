@@ -155,6 +155,27 @@ export function progressBarFillBackground(
 }
 
 /**
+ * How far the page must be scrolled before the bar may appear. At the
+ * very top the reader is looking at page chrome (header, nav, work
+ * meta), and the bar would overlay it — works with a short pre-work
+ * section register progress immediately, so without this floor the bar
+ * would never slide away there.
+ */
+export const PROGRESS_BAR_PAGE_TOP_HIDE_PX = 32;
+
+/**
+ * Whether the bar should be slid off its edge: no measured progress, or
+ * the reader is still at the top of the page. Hiding wins over showing
+ * marginal progress — obscuring real UI is worse than a late bar.
+ */
+export function progressBarHidden(
+  progressPercent: number,
+  scrollY: number,
+): boolean {
+  return progressPercent <= 0 || scrollY <= PROGRESS_BAR_PAGE_TOP_HIDE_PX;
+}
+
+/**
  * Minutes left in the measured scope at the user's speed; null when the
  * scope's word count is unknown or the reader is done.
  */

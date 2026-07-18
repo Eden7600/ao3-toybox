@@ -2,6 +2,7 @@ import { Color } from "@src/common/color";
 import {
   progressBarFillBackground,
   progressBarGeometry,
+  progressBarHidden,
   progressBarLabelText,
   remainingReadingMinutes,
   type ProgressBarGeometry,
@@ -325,7 +326,7 @@ export default class ProgressBar extends ContentScript {
 
     if (!label) return;
 
-    if (progress <= 0) {
+    if (progressBarHidden(progress, window.scrollY)) {
       label.style.visibility = "hidden";
 
       return;
@@ -395,6 +396,8 @@ export default class ProgressBar extends ContentScript {
   }
 
   private getTransformStyle(progress: number): string {
-    return progress <= 0 ? this.geometry.offscreenTransform : "translate(0)";
+    return progressBarHidden(progress, window.scrollY)
+      ? this.geometry.offscreenTransform
+      : "translate(0)";
   }
 }

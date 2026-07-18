@@ -1,7 +1,9 @@
 import { Color } from "@src/common/color";
 import {
+  PROGRESS_BAR_PAGE_TOP_HIDE_PX,
   progressBarFillBackground,
   progressBarGeometry,
+  progressBarHidden,
   progressBarLabelText,
   remainingReadingMinutes,
 } from "@src/common/progress-bar";
@@ -105,6 +107,26 @@ describe("progressBarFillBackground", () => {
   it("renders solid accent as the accent variable", () => {
     expect(progressBarFillBackground("solid", "to right", "accent")).toBe(
       `var(--ao3-accent-color, ${Color.tailwind.red[500]})`,
+    );
+  });
+});
+
+describe("progressBarHidden", () => {
+  it("hides without measured progress", () => {
+    expect(progressBarHidden(0, 5000)).toBe(true);
+    expect(progressBarHidden(-2, 5000)).toBe(true);
+  });
+
+  it("hides at the top of the page even with progress", () => {
+    // Short pre-work sections register progress at scroll 0; page chrome
+    // still wins there
+    expect(progressBarHidden(12, 0)).toBe(true);
+    expect(progressBarHidden(12, PROGRESS_BAR_PAGE_TOP_HIDE_PX)).toBe(true);
+  });
+
+  it("shows once the reader scrolls into the work", () => {
+    expect(progressBarHidden(12, PROGRESS_BAR_PAGE_TOP_HIDE_PX + 1)).toBe(
+      false,
     );
   });
 });
