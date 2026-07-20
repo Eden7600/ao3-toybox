@@ -8,6 +8,9 @@ A refined reading experience for [Archive of Our Own](https://archiveofourown.or
 [![Build](https://github.com/Eden7600/ao3-toybox/actions/workflows/build.yml/badge.svg)](https://github.com/Eden7600/ao3-toybox/actions/workflows/build.yml)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/Eden7600/ao3-toybox)](https://github.com/Eden7600/ao3-toybox/releases/latest)
+[![Firefox Add-ons](https://img.shields.io/amo/v/ao3-toybox?label=Firefox%20Add-ons&logo=firefoxbrowser&logoColor=white&color=orange)](https://addons.mozilla.org/en-US/firefox/addon/ao3-toybox/)
+
+**[➜ Install for Firefox](https://addons.mozilla.org/en-US/firefox/addon/ao3-toybox/)**
 
 </div>
 
@@ -33,9 +36,13 @@ Works on `archiveofourown.org` and its known mirrors/aliases. Know another site 
 
 ## Installation
 
-AO3 Toybox isn't on the Chrome Web Store or Firefox Add-ons yet, so for now it's installed from the [Releases page](https://github.com/Eden7600/ao3-toybox/releases/latest), which has a ready-to-use build for each browser.
+### Firefox
+
+Install it from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/ao3-toybox/) — updates arrive automatically.
 
 ### Chrome, Edge, Brave, and other Chromium browsers
+
+AO3 Toybox isn't on the Chrome Web Store yet, so Chromium browsers install it from the [Releases page](https://github.com/Eden7600/ao3-toybox/releases/latest):
 
 1. Download `ao3-toybox-chrome-vX.Y.Z.zip` from the [latest release](https://github.com/Eden7600/ao3-toybox/releases/latest) and unzip it somewhere you'll keep it (deleting the folder later disables the extension).
 2. Go to `chrome://extensions` (or your browser's equivalent extensions page).
@@ -44,19 +51,7 @@ AO3 Toybox isn't on the Chrome Web Store or Firefox Add-ons yet, so for now it's
 
 The extension updates when you repeat these steps with a newer release; it won't auto-update on its own.
 
-### Firefox
-
-Firefox only runs unsigned extensions permanently in Nightly/Developer Edition with signature checks disabled, so the straightforward path is a temporary install (reloaded each time Firefox restarts):
-
-1. Download `ao3-toybox-firefox-vX.Y.Z.zip` from the [latest release](https://github.com/Eden7600/ao3-toybox/releases/latest) and unzip it.
-2. Go to `about:debugging#/runtime/this-firefox`.
-3. Click **Load Temporary Add-on…** and select the `manifest.json` inside the unzipped folder.
-
-If you're on Firefox Nightly or Developer Edition and want a persistent install, you can instead set `xpinstall.signatures.required` to `false` in `about:config` and install the zip directly.
-
-### Building it yourself
-
-See [Development](#development) below to build from source instead.
+To build from source and load your own build instead, see [Development](#development) below.
 
 ## Development
 
@@ -85,7 +80,22 @@ pnpm install
 | `pnpm types`             | Type-check the project (`tsc --noEmit`)                     |
 | `pnpm lint`              | Lint the project (ESLint)                                   |
 
-After building, load the appropriate `dist/<browser>` folder as an unpacked/temporary extension using the same steps as [Installation](#installation), pointed at your local build instead of a downloaded release. Rebuild and reload the extension after each change — there's no hot reload for the extension itself.
+### Loading a development build
+
+After building, load the appropriate `dist/<browser>` folder as an unpacked/temporary extension. Rebuild and reload the extension after each change — there's no hot reload for the extension itself.
+
+**Chromium browsers:**
+
+1. Go to `chrome://extensions` (or your browser's equivalent extensions page).
+2. Turn on **Developer mode** (top right).
+3. Click **Load unpacked** and select `dist/chrome`.
+
+**Firefox** (temporary install, reloaded each time Firefox restarts):
+
+1. Go to `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on…** and select the `manifest.json` inside `dist/firefox`.
+
+Regular Firefox only runs unsigned extensions temporarily; if you're on Firefox Nightly or Developer Edition and want a persistent install of your own build, set `xpinstall.signatures.required` to `false` in `about:config` and install a zipped build directly.
 
 ### Tech stack
 
