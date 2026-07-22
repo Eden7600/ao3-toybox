@@ -44,40 +44,49 @@ const typeInto = (id: string, text: string) => {
 };
 
 describe("CommonTags new-tag save", () => {
-  it("hands Dexie a structured-cloneable tag with a plain aliases array", async () => {
-    const { default: CommonTags } = await import(
-      "@src/options_ui/views/tags/CommonTags.vue"
-    );
+  // Importing the view (plus UI kit) transforms inside the test body, which
+  // blows the 5s default when the full suite competes for workers
+  it(
+    "hands Dexie a structured-cloneable tag with a plain aliases array",
+    { timeout: 30_000 },
+    async () => {
+      const { default: CommonTags } = await import(
+        "@src/options_ui/views/tags/CommonTags.vue"
+      );
 
-    const host = document.createElement("div");
+      const host = document.createElement("div");
 
-    document.body.appendChild(host);
+      document.body.appendChild(host);
 
-    const app = createApp(CommonTags);
+      const app = createApp(CommonTags);
 
-    app.mount(host);
-    await nextTick();
+      app.mount(host);
+      await nextTick();
 
-    clickButton("New Tag");
-    await nextTick();
+      clickButton("New Tag");
+      await nextTick();
 
-    typeInto("newName", "  Enemies to Lovers  ");
-    typeInto("newAliases", "e2l\n enemies 2 lovers \n\n");
-    await nextTick();
+      typeInto("newName", "  Enemies to Lovers  ");
+      typeInto("newAliases", "e2l\n enemies 2 lovers \n\n");
+      await nextTick();
 
-    clickButton("Save");
-    await vi.waitFor(() => {
-      expect(added).toHaveLength(1);
-    });
+      clickButton("Save");
+      await vi.waitFor(
+        () => {
+          expect(added).toHaveLength(1);
+        },
+        { timeout: 10_000 },
+      );
 
-    expect(added[0]).toMatchObject({
-      name: "Enemies to Lovers",
-      aliases: ["e2l", "enemies 2 lovers"],
-    });
-    // Dexie's ++id key generator must assign the id, not the caller
-    expect(added[0].id).toBeUndefined();
+      expect(added[0]).toMatchObject({
+        name: "Enemies to Lovers",
+        aliases: ["e2l", "enemies 2 lovers"],
+      });
+      // Dexie's ++id key generator must assign the id, not the caller
+      expect(added[0].id).toBeUndefined();
 
-    app.unmount();
-    host.remove();
-  });
+      app.unmount();
+      host.remove();
+    },
+  );
 });
