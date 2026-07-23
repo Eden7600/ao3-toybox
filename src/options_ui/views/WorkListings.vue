@@ -175,6 +175,11 @@ const fadeSensitivityOptions = [
         label="Enable Keyboard Pagination"
         description="Enable keyboard pagination on the work browsing page"
       />
+      <SettingsToggle
+        v-model="settings.redirectAlternativeDomains"
+        label="Redirect Alternative Domains"
+        description="Redirect AO3's alternative domains (ao3.org, archive.transformativeworks.org, ...) to archiveofourown.org so logins and extension data stay on one domain"
+      />
     </div>
   </div>
 </template>

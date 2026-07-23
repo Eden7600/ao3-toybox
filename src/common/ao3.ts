@@ -17,6 +17,51 @@ export const AO3_MATCH_PATTERNS: string[] = AO3_DOMAINS.map(
   (domain) => `*://*.${domain}/*`,
 );
 
+/** The domain every alternative domain redirects to. */
+export const AO3_CANONICAL_DOMAIN = "archiveofourown.org";
+
+export const AO3_ALTERNATE_DOMAINS: string[] = AO3_DOMAINS.filter(
+  (domain) => domain !== AO3_CANONICAL_DOMAIN,
+);
+
+export const AO3_ALTERNATE_MATCH_PATTERNS: string[] = AO3_ALTERNATE_DOMAINS.map(
+  (domain) => `*://*.${domain}/*`,
+);
+
+/**
+ * The archiveofourown.org equivalent of a URL on an alternative AO3
+ * domain (ao3.org, archive.transformativeworks.org, ...), preserving
+ * path, query, and fragment and forcing https. Null when the URL is not
+ * on an alternative domain — already canonical, a non-AO3 host, or not
+ * parsable — meaning no redirect is needed.
+ */
+export function canonicalAo3Url(url: string): string | null {
+  let parsed: URL;
+
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return null;
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+  const isAlternate = AO3_ALTERNATE_DOMAINS.some(
+    (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+  );
+
+  if (!isAlternate) return null;
+
+  parsed.protocol = "https:";
+  parsed.hostname = AO3_CANONICAL_DOMAIN;
+  parsed.port = "";
+
+  return parsed.toString();
+}
+
 /**
  * Whether a URL's hostname is an AO3 domain or a subdomain of one. A
  * substring check is not enough: "archiveofourown.org.evil.com" and

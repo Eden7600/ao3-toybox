@@ -1,4 +1,5 @@
 import {
+  canonicalAo3Url,
   extractWorkIdFromUrl,
   isAo3Url,
   isWorkPage,
@@ -36,6 +37,44 @@ describe("isAo3Url", () => {
     expect(isAo3Url(undefined)).toBe(false);
     expect(isAo3Url("")).toBe(false);
     expect(isAo3Url("not a url")).toBe(false);
+  });
+});
+
+describe("canonicalAo3Url", () => {
+  it("maps alternative domains to archiveofourown.org, keeping path, query, and fragment", () => {
+    expect(
+      canonicalAo3Url(
+        "https://archive.transformativeworks.org/works/123?view_adult=true#main",
+      ),
+    ).toBe("https://archiveofourown.org/works/123?view_adult=true#main");
+    expect(canonicalAo3Url("https://ao3.org/tags/Fluff/works")).toBe(
+      "https://archiveofourown.org/tags/Fluff/works",
+    );
+    expect(canonicalAo3Url("https://archiveofourown.com/")).toBe(
+      "https://archiveofourown.org/",
+    );
+    expect(canonicalAo3Url("https://archiveofourown.net/works")).toBe(
+      "https://archiveofourown.org/works",
+    );
+  });
+
+  it("maps subdomains of alternative domains and forces https", () => {
+    expect(canonicalAo3Url("http://www.ao3.org/works/123")).toBe(
+      "https://archiveofourown.org/works/123",
+    );
+  });
+
+  it("leaves the canonical domain and its subdomains alone", () => {
+    expect(canonicalAo3Url("https://archiveofourown.org/works/123")).toBe(null);
+    expect(canonicalAo3Url("https://www.archiveofourown.org/")).toBe(null);
+  });
+
+  it("ignores non-AO3 hosts, lookalikes, and unparsable URLs", () => {
+    expect(canonicalAo3Url("https://example.com/works/123")).toBe(null);
+    expect(canonicalAo3Url("https://ao3.org.evil.com/")).toBe(null);
+    expect(canonicalAo3Url("https://notao3.org/")).toBe(null);
+    expect(canonicalAo3Url("not a url")).toBe(null);
+    expect(canonicalAo3Url("")).toBe(null);
   });
 });
 

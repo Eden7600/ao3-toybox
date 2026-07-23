@@ -1,6 +1,6 @@
 import type { PartialDeep } from "type-fest";
 import packageJson from "../package.json";
-import { AO3_MATCH_PATTERNS } from "./common/ao3";
+import { AO3_ALTERNATE_MATCH_PATTERNS, AO3_MATCH_PATTERNS } from "./common/ao3";
 
 // The data_collection_permissions key is newer than the bundled manifest
 // types: AMO requires the disclosure for new listings.
@@ -55,6 +55,13 @@ export default function (): PartialDeep<browser._manifest.WebExtensionManifest> 
       default_popup: "./popup/index.html",
     },
     content_scripts: [
+      // First so the redirect wins the race against the other scripts'
+      // work on alternative-domain pages
+      {
+        matches: AO3_ALTERNATE_MATCH_PATTERNS,
+        js: ["./content/domain-redirect.ts"],
+        run_at: "document_start",
+      },
       {
         matches: AO3_MATCH_PATTERNS,
         js: ["./content/content.ts"],

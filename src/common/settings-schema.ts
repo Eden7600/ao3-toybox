@@ -82,6 +82,7 @@ export type Settings = {
   enableKeyboardPagination: boolean;
   enableKeyboardChapterNav: boolean;
   enableOpenInNewTab: boolean; // Convert links to open in new tab
+  redirectAlternativeDomains: boolean; // Redirect ao3.org etc. to archiveofourown.org
 
   hideWorks: boolean; // Master switch for the whole hiding system
   neverHideSubscribedWorks: boolean; // Subscribed works bypass all hiding (except explicit ignores)
@@ -170,6 +171,7 @@ export const defaultSettings: Settings = {
   enableKeyboardPagination: true,
   enableKeyboardChapterNav: true,
   enableOpenInNewTab: true,
+  redirectAlternativeDomains: true,
 
   hideWorks: true,
   neverHideSubscribedWorks: false,
