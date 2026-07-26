@@ -125,7 +125,12 @@ describe("migrateTtsSettings", () => {
       pitch: 0.5,
       highlightSentence: false,
       autoScroll: true,
+      autoContinue: false,
     });
+  });
+
+  it("keeps a saved autoContinue preference", () => {
+    expect(migrateTtsSettings({ autoContinue: true }).autoContinue).toBe(true);
   });
 
   it("keeps a valid tier and piper voice, rejects unknown tiers", () => {

@@ -16,12 +16,18 @@ export type TtsSettings = {
   pitch: number;
   highlightSentence: boolean;
   autoScroll: boolean;
+  /** After the last sentence, count down and open the next chapter. */
+  autoContinue: boolean;
 };
 
 export const TTS_SETTINGS_STORAGE_KEY = "reader_toybox_tts_settings";
 
 /** Document event other scripts dispatch to open the read-aloud player. */
 export const TTS_OPEN_EVENT = "toybox-tts-open";
+
+/** SessionStorage flag set before auto-continue navigation: the next
+ *  page's player opens and starts playback on sight of it. */
+export const TTS_AUTOPLAY_FLAG = "toybox-tts-autoplay";
 
 export const TTS_RATE_MIN = 0.5;
 export const TTS_RATE_MAX = 3;
@@ -36,6 +42,7 @@ export const DEFAULT_TTS_SETTINGS: TtsSettings = {
   pitch: 1,
   highlightSentence: true,
   autoScroll: true,
+  autoContinue: false,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -81,6 +88,10 @@ export function migrateTtsSettings(saved: unknown): TtsSettings {
 
   if (typeof record.autoScroll === "boolean") {
     settings.autoScroll = record.autoScroll;
+  }
+
+  if (typeof record.autoContinue === "boolean") {
+    settings.autoContinue = record.autoContinue;
   }
 
   return settings;

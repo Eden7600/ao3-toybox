@@ -17,6 +17,7 @@ import {
 import { speechTextOrBeat } from "@src/common/tts/speech-text";
 import {
   migrateTtsSettings,
+  TTS_AUTOPLAY_FLAG,
   TTS_OPEN_EVENT,
   TTS_PITCH_MAX,
   TTS_PITCH_MIN,
@@ -206,6 +207,47 @@ type SessionRefs = {
   engine: WebSpeechEngine | PiperSpeechEngine;
   sentences: TtsSentence[];
 };
+
+const CONTINUE_COUNTDOWN_SECONDS = 5;
+
+/**
+ * Full-screen "up next" countdown before auto-continuing into the next
+ * chapter. Fixed positioning escapes the corner host, so it genuinely
+ * covers the viewport.
+ */
+const ContinueOverlay = ({
+  secondsLeft,
+  nextChapterNumber,
+  onCancel,
+  onContinueNow,
+}: {
+  secondsLeft: number;
+  nextChapterNumber: number | null;
+  onCancel: () => void;
+  onContinueNow: () => void;
+}) => (
+  <div class="tts-continue-overlay" role="dialog" aria-label="Up next">
+    <div class="tts-continue-card">
+      <p class="tts-continue-label">Up next</p>
+      <h2 class="tts-continue-title">
+        {nextChapterNumber === null
+          ? "Next chapter"
+          : `Chapter ${String(nextChapterNumber)}`}
+      </h2>
+      <div class="tts-continue-count" aria-live="polite">
+        {secondsLeft}
+      </div>
+      <div class="tts-continue-actions">
+        <button class="tts-continue-btn" onClick={onCancel}>
+          Cancel
+        </button>
+        <button class="tts-continue-btn primary" onClick={onContinueNow}>
+          Continue now
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 /** Download/storage state of the enhanced tier, owned by the player. */
 type PiperState = {
@@ -483,6 +525,18 @@ const PlayerPopover = ({
           />
           Follow along (auto-scroll)
         </label>
+        <label class="tts-check">
+          <input
+            type="checkbox"
+            checked={prefs.autoContinue}
+            onChange={(event) => {
+              updatePrefs({
+                autoContinue: (event.target as HTMLInputElement).checked,
+              });
+            }}
+          />
+          Continue to next chapter after finishing
+        </label>
         <button
           class="tts-preview"
           // A natural voice can only be previewed once its model exists;
@@ -608,6 +662,7 @@ const TtsPlayerUI = ({
   });
   const [followSuppressed, setFollowSuppressed] = useState(false);
   const [synthesizing, setSynthesizing] = useState(false);
+  const [continueIn, setContinueIn] = useState<number | null>(null);
   const [piper, setPiper] = useState<PiperState>({
     stored: null,
     downloadingPct: null,
@@ -635,6 +690,12 @@ const TtsPlayerUI = ({
         ?.getAttribute("href") ?? null,
     [],
   );
+
+  const nextChapterNumber = useMemo(() => {
+    const current = scrapeCurrentChapter();
+
+    return current === null ? null : current + 1;
+  }, []);
 
   const dropSession = () => {
     const active = session.current;
@@ -737,6 +798,11 @@ const TtsPlayerUI = ({
 
           if (range && prefsRef.current.autoScroll && !suppressedRef.current) {
             scrollRangeIntoView(range);
+          }
+        },
+        onComplete() {
+          if (prefsRef.current.autoContinue && nextChapterHref) {
+            setContinueIn(CONTINUE_COUNTDOWN_SECONDS);
           }
         },
         // Reader's cadence: a beat between sentences, a longer one at
@@ -887,6 +953,73 @@ const TtsPlayerUI = ({
       warmed.engine.warmUp();
     }
   }, [open, prefs.tier, prefs.piperVoiceId, piper]);
+
+  const continueNow = () => {
+    if (!nextChapterHref) {
+      setContinueIn(null);
+
+      return;
+    }
+
+    try {
+      sessionStorage.setItem(TTS_AUTOPLAY_FLAG, "1");
+    } catch {
+      // Blocked storage just means the next page won't auto-play
+    }
+
+    window.location.assign(nextChapterHref);
+  };
+
+  // The up-next countdown: tick once a second, navigate at zero
+  useEffect(() => {
+    if (continueIn === null) {
+      return;
+    }
+
+    if (continueIn <= 0) {
+      continueNow();
+
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setContinueIn((seconds) => (seconds === null ? null : seconds - 1));
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [continueIn]);
+
+  // Arriving via auto-continue: open the player and pick up reading
+  const autoplayPending = useRef(false);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(TTS_AUTOPLAY_FLAG)) {
+        sessionStorage.removeItem(TTS_AUTOPLAY_FLAG);
+        autoplayPending.current = true;
+        setOpen(true);
+      }
+    } catch {
+      // No sessionStorage, no handoff
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!autoplayPending.current || !open) {
+      return;
+    }
+
+    // The natural tier needs the stored-voice inventory before the
+    // session can pick its engine
+    if (prefs.tier === "piper" && piper.stored === null) {
+      return;
+    }
+
+    autoplayPending.current = false;
+    ensureSession().controller.play();
+  }, [open, prefs.tier, piper.stored]);
 
   // External open requests (the toolbar's Listen button)
   useEffect(() => {
@@ -1056,6 +1189,16 @@ const TtsPlayerUI = ({
 
   return (
     <div style="position: relative;">
+      {continueIn !== null && (
+        <ContinueOverlay
+          secondsLeft={continueIn}
+          nextChapterNumber={nextChapterNumber}
+          onCancel={() => {
+            setContinueIn(null);
+          }}
+          onContinueNow={continueNow}
+        />
+      )}
       {followSuppressed && playback.status === "speaking" && (
         <button class="tts-follow-chip" onClick={refollow}>
           ↓ Jump to spoken text

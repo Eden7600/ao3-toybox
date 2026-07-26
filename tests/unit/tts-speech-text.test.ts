@@ -49,6 +49,29 @@ describe("speechText", () => {
     expect(speechText("You did what?!")).toBe("You did what?!");
   });
 
+  it("speaks the letter A as a letter, never the article", () => {
+    expect(speechText("He got an A+ on the final.")).toBe(
+      "He got an Ay plus on the final.",
+    );
+    expect(speechText("She scraped an A- somehow.")).toBe(
+      "She scraped an Ay minus somehow.",
+    );
+    expect(speechText("The A-list crowd arrived.")).toBe(
+      "The Ay-list crowd arrived.",
+    );
+    expect(speechText("Plan A failed.")).toBe("Plan Ay failed.");
+    expect(speechText("It was an A.")).toBe("It was an Ay.");
+  });
+
+  it("leaves the article A alone, capitalized or shouted", () => {
+    expect(speechText("A dog barked.")).toBe("A dog barked.");
+    expect(speechText("She wanted a way out.")).toBe("She wanted a way out.");
+    expect(speechText("Building A Better Tomorrow")).toBe(
+      "Building A Better Tomorrow",
+    );
+    expect(speechText("IT WAS A TRAP")).toBe("IT WAS A TRAP");
+  });
+
   it("normalizes whitespace including non-breaking spaces", () => {
     expect(speechText("one\u00a0two   three")).toBe("one two three");
   });

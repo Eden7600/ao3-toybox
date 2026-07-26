@@ -29,6 +29,19 @@ export function speechText(text: string): string {
   spoken = spoken.replace(EMPHASIS_WRAP, "$2");
   spoken = spoken.replace(DIVIDER_RUN, " ");
 
+  // The letter A: phonemizers read a bare capital A as the article
+  // ("uh"), wrong for grades and labels ("A+", "plan A", "A-list").
+  // The standalone rule needs a preceding lowercase word and a
+  // non-capitalized continuation, so the capitalized article ("A dog
+  // barked.", title-case headings) never matches
+  spoken = spoken.replace(/\bA\+/gu, "Ay plus");
+  spoken = spoken.replace(/\bA-(?=$|[\s,.!?;:'"”’)])/gu, "Ay minus");
+  spoken = spoken.replace(/\bA(?=-\p{L})/gu, "Ay");
+  spoken = spoken.replace(
+    /(?<=\p{Ll}\s)A(?=$|[,.!?;:'"”’)]|\s+\p{Ll})/gu,
+    "Ay",
+  );
+
   // Ellipses: a leading one is a trailing-off pickup (drop it), one
   // before more words is a mid-thought beat (comma), a final one is a
   // trail-off (period)
