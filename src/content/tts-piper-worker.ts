@@ -17,10 +17,26 @@ import {
   stored,
   TtsSession,
 } from "@mintplex-labs/piper-tts-web";
+import { env as ortEnv } from "onnxruntime-web";
 import type {
   PiperWorkerRequest,
   PiperWorkerResponse,
 } from "@src/common/tts/piper-protocol";
+
+// Piper sets numThreads to hardwareConcurrency, but a page-origin worker
+// can never be crossOriginIsolated, so ORT would only warn and fall back
+// to one thread after a failed spawn. Pin it so init skips the attempt.
+try {
+  Object.defineProperty(ortEnv.wasm, "numThreads", {
+    configurable: true,
+    get: () => 1,
+    set() {
+      /* Pinned single-thread */
+    },
+  });
+} catch {
+  ortEnv.wasm.numThreads = 1;
+}
 
 const scope = self as unknown as {
   postMessage(message: PiperWorkerResponse, transfer?: Transferable[]): void;

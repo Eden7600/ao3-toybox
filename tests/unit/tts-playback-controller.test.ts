@@ -16,6 +16,7 @@ const OPTIONS: SpeakOptions = { rate: 1, pitch: 1, voiceId: null };
  */
 class FakeEngine implements SpeechEngine {
   spoken: string[] = [];
+  prefetched: string[] = [];
   cancelCount = 0;
   private pending: {
     resolve: (ended: boolean) => void;
@@ -28,6 +29,10 @@ class FakeEngine implements SpeechEngine {
     return new Promise((resolve, reject) => {
       this.pending = { resolve, reject };
     });
+  }
+
+  prefetch(text: string): void {
+    this.prefetched.push(text);
   }
 
   cancel(): void {
@@ -201,6 +206,25 @@ describe("PlaybackController", () => {
     await engine.end();
 
     expect(controller.getState().status).toBe("ended");
+  });
+
+  it("hints each following sentence for gapless engines", async () => {
+    const engine = new FakeEngine();
+    const controller = new PlaybackController(
+      engine,
+      ["One.", "Two.", "Three."],
+      OPTIONS,
+      {},
+    );
+
+    controller.play();
+    await drain();
+    await engine.end();
+    await engine.end();
+    await engine.end();
+
+    // The final sentence has no successor to hint
+    expect(engine.prefetched).toEqual(["Two.", "Three."]);
   });
 
   it("play(index) starts from an explicit sentence", async () => {

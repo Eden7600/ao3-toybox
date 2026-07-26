@@ -23,6 +23,12 @@ export type SpeechEngine = {
   speak(text: string, options: SpeakOptions): Promise<boolean>;
   /** Stop the current utterance; the pending speak() must settle. */
   cancel(): void;
+  /**
+   * Optional hint: the sentence likely to be spoken next. Engines with
+   * synthesis latency use it to prepare ahead so playback is gapless;
+   * it must never affect correctness.
+   */
+  prefetch?(text: string, options: SpeakOptions): void;
 };
 
 export type PlaybackStatus = "idle" | "speaking" | "paused" | "ended" | "error";
@@ -155,12 +161,21 @@ export class PlaybackController {
       this.callbacks.onSentence?.(index);
 
       const text = this.sentences[index];
+      const next = this.sentences[index + 1] as string | undefined;
       let outcome: "ended" | "cancelled" | "failed";
 
       try {
+        const speaking = this.speakWithWatchdog(text);
+
+        // Hint after issuing the current sentence, so an engine that
+        // queues work keeps this one first
+        if (next !== undefined) {
+          this.engine.prefetch?.(next, this.options);
+        }
+
         // Sequential by design: exactly one sentence speaks at a time
         // eslint-disable-next-line no-await-in-loop
-        const ended = await this.speakWithWatchdog(text);
+        const ended = await speaking;
 
         outcome = ended ? "ended" : "cancelled";
       } catch (error) {

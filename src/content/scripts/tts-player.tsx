@@ -807,6 +807,27 @@ const TtsPlayerUI = ({
       });
   };
 
+  // Warm the natural voice while the reader reaches for play: model
+  // init costs seconds, so start it as soon as the player is open and
+  // the downloaded voice is the active tier
+  useEffect(() => {
+    if (
+      !open ||
+      prefs.tier !== "piper" ||
+      !(piper.stored?.includes(prefs.piperVoiceId) ?? false) ||
+      session.current !== null ||
+      piper.downloadingPct !== null
+    ) {
+      return;
+    }
+
+    const warmed = ensureSession();
+
+    if (warmed.engine instanceof PiperSpeechEngine) {
+      warmed.engine.warmUp();
+    }
+  }, [open, prefs.tier, prefs.piperVoiceId, piper]);
+
   // External open requests (the toolbar's Listen button)
   useEffect(() => {
     const onOpen = () => {
