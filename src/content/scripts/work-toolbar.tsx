@@ -17,12 +17,12 @@ import {
 } from "@src/common/work-status";
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { TTS_OPEN_EVENT } from "@src/common/tts/tts-settings";
 import { ContentScript } from "../content-script";
 import {
   toolbarBadgeFor,
   ToolbarIcon,
   toolbarIconIdFor,
+  toolbarShortLabelFor,
 } from "../toolbar-icons";
 import {
   collectFeedbackActions,
@@ -54,9 +54,10 @@ function isPlainLeftClick(event: MouseEvent): boolean {
 }
 
 /**
- * Compact-mode face of a control: recognized actions collapse to an
- * icon (label becomes title/aria-label, comment counts survive as a
- * small badge); unrecognized labels keep their text.
+ * Compact-mode face of a control: universally recognizable actions
+ * collapse to an icon (comment counts survive as a small badge),
+ * chapter navigation shortens to "Next"/"Previous", everything else
+ * keeps its text.
  */
 const ActionFace = ({
   label,
@@ -68,7 +69,7 @@ const ActionFace = ({
   const iconId = compact ? toolbarIconIdFor(label) : null;
 
   if (!iconId) {
-    return <>{label}</>;
+    return <>{(compact ? toolbarShortLabelFor(label) : null) ?? label}</>;
   }
 
   const badge = toolbarBadgeFor(label);
@@ -81,14 +82,16 @@ const ActionFace = ({
   );
 };
 
-/** Props shared by icon-mode buttons so tooltips carry the lost label. */
+/** Compacted buttons carry the full label in title/aria-label. */
 function compactAttrs(label: string, compact: boolean) {
-  const compacted = compact && toolbarIconIdFor(label) !== null;
+  const iconified = compact && toolbarIconIdFor(label) !== null;
+  const shortened =
+    compact && !iconified && toolbarShortLabelFor(label) !== null;
 
   return {
-    class: `rt-toolbar-btn${compacted ? " rt-icon-only" : ""}`,
-    title: compacted ? label : undefined,
-    "aria-label": compacted ? label : undefined,
+    class: `rt-toolbar-btn${iconified ? " rt-icon-only" : ""}`,
+    title: iconified || shortened ? label : undefined,
+    "aria-label": iconified ? label : undefined,
   };
 }
 
@@ -412,22 +415,6 @@ const WorkToolbarUI = ({
           compact={settings.compactWorkToolbar}
         />
       ))}
-      {settings.enableTts && (
-        <button
-          class={`rt-toolbar-btn${settings.compactWorkToolbar ? " rt-icon-only" : ""}`}
-          title="Read this work aloud"
-          aria-label="Listen"
-          onClick={() => {
-            document.dispatchEvent(new CustomEvent(TTS_OPEN_EVENT));
-          }}
-        >
-          {settings.compactWorkToolbar ? (
-            <ToolbarIcon id="headphones" />
-          ) : (
-            "🎧 Listen"
-          )}
-        </button>
-      )}
       <span class="rt-toolbar-spacer" />
       {progressStore && (
         <ProgressSection

@@ -1,29 +1,43 @@
-import { toolbarBadgeFor, toolbarIconIdFor } from "@src/content/toolbar-icons";
+import {
+  toolbarBadgeFor,
+  toolbarIconIdFor,
+  toolbarShortLabelFor,
+} from "@src/content/toolbar-icons";
 import { describe, expect, it } from "vitest";
 
 describe("toolbarIconIdFor", () => {
-  it("classifies every icon-worthy adopted action", () => {
+  it("iconifies only the universally recognizable actions", () => {
     expect(toolbarIconIdFor("Share")).toBe("share");
     expect(toolbarIconIdFor("Download")).toBe("download");
     expect(toolbarIconIdFor("Bookmark")).toBe("bookmark");
-    expect(toolbarIconIdFor("Subscribe")).toBe("bell");
-    expect(toolbarIconIdFor("Unsubscribe")).toBe("bell-off");
-    expect(toolbarIconIdFor("Mark for Later")).toBe("clock");
-    expect(toolbarIconIdFor("Mark as Read")).toBe("check");
     expect(toolbarIconIdFor("Comments (42)")).toBe("comment");
-    expect(toolbarIconIdFor("Kudos ♥")).toBe("heart");
-    expect(toolbarIconIdFor("↑ Top")).toBe("arrow-up");
     expect(toolbarIconIdFor("Chapter Index")).toBe("list");
-    expect(toolbarIconIdFor("Hide Creator's Style")).toBe("eye-off");
-    expect(toolbarIconIdFor("Show Creator's Style")).toBe("eye");
   });
 
-  it("keeps reading-flow navigation and unknown labels textual", () => {
+  it("keeps everything else textual", () => {
+    expect(toolbarIconIdFor("Subscribe")).toBeNull();
+    expect(toolbarIconIdFor("Unsubscribe")).toBeNull();
+    expect(toolbarIconIdFor("Mark for Later")).toBeNull();
+    expect(toolbarIconIdFor("Mark as Read")).toBeNull();
+    expect(toolbarIconIdFor("Kudos ♥")).toBeNull();
+    expect(toolbarIconIdFor("↑ Top")).toBeNull();
+    expect(toolbarIconIdFor("Hide Creator's Style")).toBeNull();
     expect(toolbarIconIdFor("Entire Work")).toBeNull();
     expect(toolbarIconIdFor("Next Chapter →")).toBeNull();
-    expect(toolbarIconIdFor("← Previous Chapter")).toBeNull();
     expect(toolbarIconIdFor("Some Future AO3 Button")).toBeNull();
-    expect(toolbarIconIdFor("Reset progress to Ch 3")).toBeNull();
+  });
+});
+
+describe("toolbarShortLabelFor", () => {
+  it("shortens chapter navigation to bare direction words", () => {
+    expect(toolbarShortLabelFor("Next Chapter →")).toBe("Next");
+    expect(toolbarShortLabelFor("← Previous Chapter")).toBe("Previous");
+  });
+
+  it("leaves every other label alone", () => {
+    expect(toolbarShortLabelFor("Entire Work")).toBeNull();
+    expect(toolbarShortLabelFor("Subscribe")).toBeNull();
+    expect(toolbarShortLabelFor("Chapter Index")).toBeNull();
   });
 });
 

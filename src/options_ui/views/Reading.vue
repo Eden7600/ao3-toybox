@@ -119,8 +119,8 @@ const adoptWpm = (wpm: number) => {
       />
       <SettingsToggle
         v-model="settings.compactWorkToolbar"
-        label="Compact Toolbar Icons"
-        description="Show common toolbar actions (share, download, bookmark, subscribe, kudos, comments…) as icons instead of text to keep the toolbar tidy — hover any icon for its name. Reading navigation stays as text"
+        label="Compact Toolbar"
+        description="Tidy the work toolbar: download, share, bookmark, comments, and chapter index become icons (hover for the name), and chapter navigation shortens to Next / Previous. Everything else stays as text"
       />
       <SettingsToggle
         v-model="settings.showReturnToTopButton"
