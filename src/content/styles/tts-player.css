@@ -93,6 +93,18 @@
   outline-offset: 1px;
 }
 
+/* "Generating audio" state on the play/pause button */
+
+.tts-spin {
+  animation: tts-rotate 0.9s linear infinite;
+}
+
+@keyframes tts-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Follow-again chip, shown when the reader scrolled away mid-playback */
 
 .tts-follow-chip {

@@ -208,6 +208,43 @@ describe("PlaybackController", () => {
     expect(controller.getState().status).toBe("ended");
   });
 
+  it("inserts the pacing pause between sentences, not after the last", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const engine = new FakeEngine();
+      const pausedAfter: number[] = [];
+      const controller = new PlaybackController(
+        engine,
+        ["One.", "Two."],
+        OPTIONS,
+        {
+          pauseAfterMs(index) {
+            pausedAfter.push(index);
+
+            return 400;
+          },
+        },
+      );
+
+      controller.play();
+      await drain();
+      await engine.end();
+
+      // Sentence one finished; the pause gates sentence two
+      expect(engine.spoken).toEqual(["One."]);
+      await vi.advanceTimersByTimeAsync(401);
+      expect(engine.spoken).toEqual(["One.", "Two."]);
+
+      await engine.end();
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(controller.getState().status).toBe("ended");
+      expect(pausedAfter).toEqual([0, 1]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("hints each following sentence for gapless engines", async () => {
     const engine = new FakeEngine();
     const controller = new PlaybackController(

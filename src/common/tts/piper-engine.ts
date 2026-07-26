@@ -235,6 +235,8 @@ export class PiperSpeechEngine implements SpeechEngine {
   private requestId = 0;
   /** Text → decoded audio (or its in-flight synthesis). */
   private readonly cache = new Map<string, Promise<AudioBuffer>>();
+  /** Fired when audio actually starts (UI "generating…" indicator). */
+  onAudibleStart: (() => void) | null = null;
 
   constructor(client: PiperWorkerClient, voiceId: string) {
     this.client = client;
@@ -362,6 +364,7 @@ export class PiperSpeechEngine implements SpeechEngine {
         resolve(!cancelled);
       };
 
+      this.onAudibleStart?.();
       source.start();
     });
   }

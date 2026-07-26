@@ -14,6 +14,7 @@ import {
   detectContentLocale,
   type TtsSentence,
 } from "@src/common/tts/sentence-source";
+import { speechTextOrBeat } from "@src/common/tts/speech-text";
 import {
   migrateTtsSettings,
   TTS_OPEN_EVENT,
@@ -183,6 +184,18 @@ const GearIcon = icon(
   "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.5-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.5 2 1.5A7 7 0 0 0 5 12a7 7 0 0 0 .1 1.2l-2 1.5 2 3.5 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.4-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.5-2-1.5A7 7 0 0 0 19 12z",
 );
 const CloseIcon = icon("M18 6 6 18 M6 6l12 12");
+const SpinnerIcon = () => (
+  <svg
+    class="tts-spin"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+  >
+    <path d="M12 3a9 9 0 1 1-9 9" />
+  </svg>
+);
 
 /* ---------------------------------------------------------------- */
 /* Player UI                                                        */
@@ -490,6 +503,7 @@ const PlayerPopover = ({
 const PlayerCluster = ({
   playback,
   cannotSpeak,
+  synthesizing,
   total,
   showSettings,
   togglePlay,
@@ -499,6 +513,7 @@ const PlayerCluster = ({
 }: {
   playback: PlaybackState;
   cannotSpeak: boolean;
+  synthesizing: boolean;
   total: number | null;
   showSettings: boolean;
   togglePlay: () => void;
@@ -507,6 +522,7 @@ const PlayerCluster = ({
   closePlayer: () => void;
 }) => {
   const speaking = playback.status === "speaking";
+  const loading = speaking && synthesizing;
   const stepDisabled =
     cannotSpeak || playback.status === "idle" || playback.status === "ended";
 
@@ -526,11 +542,17 @@ const PlayerCluster = ({
       <button
         class="tts-btn primary"
         aria-label={speaking ? "Pause" : "Play"}
-        title={speaking ? "Pause" : "Read aloud from here"}
+        title={
+          loading
+            ? "Generating audio… (click to pause)"
+            : speaking
+              ? "Pause"
+              : "Read aloud from here"
+        }
         disabled={cannotSpeak}
         onClick={togglePlay}
       >
-        {speaking ? <PauseIcon /> : <PlayIcon />}
+        {loading ? <SpinnerIcon /> : speaking ? <PauseIcon /> : <PlayIcon />}
       </button>
       <button
         class="tts-btn"
@@ -585,6 +607,7 @@ const TtsPlayerUI = ({
     index: 0,
   });
   const [followSuppressed, setFollowSuppressed] = useState(false);
+  const [synthesizing, setSynthesizing] = useState(false);
   const [piper, setPiper] = useState<PiperState>({
     stored: null,
     downloadingPct: null,
@@ -675,9 +698,17 @@ const TtsPlayerUI = ({
           prefsRef.current.piperVoiceId,
         )
       : new WebSpeechEngine(window.speechSynthesis);
+
+    // Audio actually flowing clears the "generating audio" indicator
+    engine.onAudibleStart = () => {
+      setSynthesizing(false);
+    };
+
     const controller = new PlaybackController(
       engine,
-      sentences.map((sentence) => sentence.text),
+      // The engine speaks a pacing-repaired form; display text and
+      // highlight ranges keep the original
+      sentences.map((sentence) => speechTextOrBeat(sentence.text)),
       {
         rate: prefsRef.current.rate,
         pitch: prefsRef.current.pitch,
@@ -687,6 +718,10 @@ const TtsPlayerUI = ({
         onState(state) {
           setPlayback(state);
 
+          if (state.status !== "speaking") {
+            setSynthesizing(false);
+          }
+
           if (state.status !== "speaking" && state.status !== "paused") {
             setSentenceHighlight(null);
           }
@@ -695,6 +730,7 @@ const TtsPlayerUI = ({
           const sentence = sentences[index] as TtsSentence | undefined;
           const range = sentence?.range ?? null;
 
+          setSynthesizing(true);
           setSentenceHighlight(
             prefsRef.current.highlightSentence ? range : null,
           );
@@ -702,6 +738,21 @@ const TtsPlayerUI = ({
           if (range && prefsRef.current.autoScroll && !suppressedRef.current) {
             scrollRangeIntoView(range);
           }
+        },
+        // Reader's cadence: a beat between sentences, a longer one at
+        // paragraph ends, a clear break around chapter announcements
+        pauseAfterMs(index) {
+          const sentence = sentences[index] as TtsSentence | undefined;
+
+          if (!sentence) {
+            return 0;
+          }
+
+          if (sentence.isAnnouncement) {
+            return 700;
+          }
+
+          return sentence.endsBlock ? 400 : 90;
         },
       },
     );
@@ -1028,6 +1079,7 @@ const TtsPlayerUI = ({
       <PlayerCluster
         playback={playback}
         cannotSpeak={cannotSpeak}
+        synthesizing={synthesizing}
         total={session.current?.sentences.length ?? null}
         showSettings={showSettings}
         togglePlay={togglePlay}

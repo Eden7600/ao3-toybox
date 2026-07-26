@@ -46,6 +46,12 @@ export type PlaybackCallbacks = {
   onSentence?: (index: number) => void;
   /** Fired once when the final sentence finishes. */
   onComplete?: () => void;
+  /**
+   * Silence inserted after a completed sentence, in milliseconds —
+   * pacing control (longer beats at paragraph breaks). 0/undefined
+   * means advance immediately.
+   */
+  pauseAfterMs?: (index: number) => number;
 };
 
 /** Consecutive failures on one sentence before playback stops. */
@@ -208,6 +214,22 @@ export class PlaybackController {
       }
 
       failureStreak = 0;
+
+      // A breath between sentences, longer at paragraph breaks; a user
+      // action during the pause owns the state from here
+      const pauseMs = this.callbacks.pauseAfterMs?.(index) ?? 0;
+
+      if (pauseMs > 0 && index + 1 < this.sentences.length) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => {
+          setTimeout(resolve, pauseMs);
+        });
+
+        if (generation !== this.generation) {
+          return;
+        }
+      }
+
       index++;
     }
 

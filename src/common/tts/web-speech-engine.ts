@@ -94,6 +94,8 @@ export class WebSpeechEngine implements SpeechEngine {
   private readonly synth: SpeechSynthesis;
   /** Settles the in-flight speak() when cancel() gets no engine event. */
   private settleActive: ((ended: boolean) => void) | null = null;
+  /** Fired when audio actually starts (UI "generating…" indicator). */
+  onAudibleStart: (() => void) | null = null;
 
   constructor(synth: SpeechSynthesis) {
     this.synth = synth;
@@ -123,6 +125,10 @@ export class WebSpeechEngine implements SpeechEngine {
         }
 
         resolve(ended);
+      };
+
+      utterance.onstart = () => {
+        this.onAudibleStart?.();
       };
 
       utterance.onend = () => {

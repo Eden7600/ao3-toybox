@@ -15,6 +15,9 @@ export type TtsSentence = {
   range: Range | null;
   /** Synthetic chapter-transition announcement (never highlighted). */
   isAnnouncement: boolean;
+  /** Last sentence of its paragraph/block — a natural place for a
+   *  longer pause than between sentences. */
+  endsBlock: boolean;
 };
 
 /**
@@ -199,7 +202,19 @@ function sentencesFromBlock(
     range.setStart(start.node, start.offset);
     range.setEnd(end.node, end.offset);
 
-    sentences.push({ text: spoken, chapter, range, isAnnouncement: false });
+    sentences.push({
+      text: spoken,
+      chapter,
+      range,
+      isAnnouncement: false,
+      endsBlock: false,
+    });
+  }
+
+  const last = sentences.at(-1);
+
+  if (last) {
+    last.endsBlock = true;
   }
 
   return sentences;
@@ -262,6 +277,7 @@ export function buildSentenceList(
         chapter,
         range: null,
         isAnnouncement: true,
+        endsBlock: true,
       });
     }
 
