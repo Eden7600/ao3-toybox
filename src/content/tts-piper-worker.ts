@@ -107,7 +107,28 @@ async function handle(message: PiperWorkerRequest): Promise<void> {
           total: progress.total,
         });
       });
-      scope.postMessage({ type: "downloaded", voices: await stored() });
+
+      // Piper's download() drops its OPFS write promises, and OPFS
+      // writes are atomic-on-close — the voice isn't listable until the
+      // close lands. Wait for it, or the UI reports "not downloaded"
+      // and a second click re-fetches the whole model.
+      const deadline = Date.now() + 30_000;
+      let voices = await stored();
+
+      while (!voices.includes(message.voiceId) && Date.now() < deadline) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => {
+          setTimeout(resolve, 200);
+        });
+        // eslint-disable-next-line no-await-in-loop
+        voices = await stored();
+      }
+
+      if (!voices.includes(message.voiceId)) {
+        throw new Error("the voice download never appeared in storage");
+      }
+
+      scope.postMessage({ type: "downloaded", voices });
       break;
     }
 
