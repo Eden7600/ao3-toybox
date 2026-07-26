@@ -38,6 +38,7 @@ import { localExtStorage } from "@webext-core/storage";
 import { render } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { ContentScript } from "../content-script";
+import { DOCK_ORDER, dockCornerHost, setDockDetached } from "../corner-dock";
 import { createShadowHost } from "../shadow-host";
 import rtBaseStyles from "../styles/rt-base.css?inline";
 import ttsPlayerStyles from "../styles/tts-player.css?inline";
@@ -646,9 +647,11 @@ const PlayerCluster = ({
 };
 
 const TtsPlayerUI = ({
+  host,
   initialPrefs,
   piperAssets,
 }: {
+  host: HTMLElement;
   initialPrefs: TtsSettings;
   piperAssets: PiperAssets;
 }) => {
@@ -660,6 +663,12 @@ const TtsPlayerUI = ({
     status: "idle",
     index: 0,
   });
+
+  // Collapsed, the trigger fuses into the corner pill; open, the wide
+  // cluster detaches so the segments above re-round into their own pill
+  useEffect(() => {
+    setDockDetached(host, open);
+  }, [host, open]);
   const [followSuppressed, setFollowSuppressed] = useState(false);
   const [synthesizing, setSynthesizing] = useState(false);
   const [continueIn, setContinueIn] = useState<number | null>(null);
@@ -1258,16 +1267,15 @@ export default class TtsPlayer extends ContentScript {
       .getItem(TTS_SETTINGS_STORAGE_KEY)
       .catch(() => null);
 
+    // Its own host (the player works with the reader panel disabled),
+    // docked into the shared corner column below the settings segment
     const { host, root } = createShadowHost({
       css: `${rtBaseStyles}\n${ttsPlayerStyles}`,
-      // Sits beside the reading-settings FAB corner; its own host so the
-      // player works with the reader panel disabled
-      hostStyle:
-        "position: fixed; bottom: 20px; right: 64px; z-index: 2147483646;",
     });
 
     host.dataset.toyboxTtsPlayer = "true";
     root.classList.add("tts-root");
+    dockCornerHost(host, DOCK_ORDER.ttsPlayer);
 
     // Packaged pieces of the enhanced tier, resolved here so the engine
     // and worker stay extension-API-free
@@ -1282,6 +1290,7 @@ export default class TtsPlayer extends ContentScript {
 
     render(
       <TtsPlayerUI
+        host={host}
         initialPrefs={migrateTtsSettings(saved)}
         piperAssets={piperAssets}
       />,

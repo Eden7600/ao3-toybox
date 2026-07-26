@@ -36,6 +36,46 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
+/* Corner-dock fusing: collapsed, the trigger is a segment of the
+   corner pill (data-dock-pos stamped by the dock; see work-settings.css
+   for the scheme). Open, the host detaches and these rules idle. */
+
+:host([data-dock-pos="top"]) .tts-fab {
+  border-radius: 19px 19px 0 0;
+  clip-path: inset(-20px -20px 0 -20px);
+}
+
+:host([data-dock-pos="middle"]) .tts-fab {
+  border-radius: 0;
+  border-top: none;
+  clip-path: inset(0 -20px);
+}
+
+:host([data-dock-pos="bottom"]) .tts-fab {
+  border-radius: 0 0 19px 19px;
+  border-top: none;
+  clip-path: inset(0 -20px -20px -20px);
+}
+
+:host([data-dock-pos="top"]) .tts-fab,
+:host([data-dock-pos="middle"]) .tts-fab,
+:host([data-dock-pos="bottom"]) .tts-fab {
+  height: 34px;
+}
+
+:host([data-dock-pos="top"]) .tts-fab:hover,
+:host([data-dock-pos="middle"]) .tts-fab:hover,
+:host([data-dock-pos="bottom"]) .tts-fab:hover {
+  transform: none;
+  background: var(--rt-surface-hover);
+}
+
+:host([data-dock-pos="top"]) .tts-fab:focus-visible,
+:host([data-dock-pos="middle"]) .tts-fab:focus-visible,
+:host([data-dock-pos="bottom"]) .tts-fab:focus-visible {
+  outline-offset: -2px;
+}
+
 /* Open cluster: horizontal pill of flat controls */
 
 .tts-cluster {

@@ -20,6 +20,7 @@ import {
 import { localExtStorage } from "@webext-core/storage";
 import SliderRow from "../components/slider-row";
 import ToggleGroup from "../components/toggle-group";
+import { DOCK_ORDER, dockCornerHost } from "../corner-dock";
 import { createShadowHost } from "../shadow-host";
 import rtBaseStyles from "../styles/rt-base.css?inline";
 import workSettingsStyles from "../styles/work-settings.css?inline";
@@ -258,9 +259,9 @@ export default class WorkSettings extends ContentScript {
 
     const { host, root } = createShadowHost({
       css: `${rtBaseStyles}\n${workSettingsStyles}`,
-      hostStyle:
-        "position: fixed; bottom: 20px; right: 20px; z-index: 2147483646;",
     });
+
+    dockCornerHost(host, DOCK_ORDER.readingSettings);
 
     render(
       <ReadingSettingsUI
