@@ -470,7 +470,16 @@ const PlayerPopover = ({
           />
           Follow along (auto-scroll)
         </label>
-        <button class="tts-preview" onClick={preview}>
+        <button
+          class="tts-preview"
+          // A natural voice can only be previewed once its model exists;
+          // the download CTA sits directly above this button
+          disabled={
+            prefs.tier === "piper" &&
+            !(piper.stored?.includes(prefs.piperVoiceId) ?? false)
+          }
+          onClick={preview}
+        >
           ▶ Preview voice
         </button>
       </>

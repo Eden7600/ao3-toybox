@@ -44,6 +44,7 @@ const scope = self as unknown as {
 };
 
 let session: TtsSession | null = null;
+let sessionVoiceId: string | null = null;
 
 function reportError(context: string, error: unknown): void {
   scope.postMessage({
@@ -57,12 +58,18 @@ function reportError(context: string, error: unknown): void {
 async function handle(message: PiperWorkerRequest): Promise<void> {
   switch (message.type) {
     case "init": {
-      // Re-init after a content-side cancel is a no-op; the session
-      // survives in the worker
-      if (session) {
+      // Re-init for the same voice is a no-op; the session survives in
+      // the worker
+      if (session && sessionVoiceId === message.voiceId) {
         scope.postMessage({ type: "ready" });
         break;
       }
+
+      // Voice change: TtsSession is a singleton whose constructor hands
+      // back the existing instance without reloading the model — reset
+      // it so the new voice actually loads
+      TtsSession._instance = null;
+      session = null;
 
       session = await TtsSession.create({
         voiceId: message.voiceId,
@@ -75,6 +82,7 @@ async function handle(message: PiperWorkerRequest): Promise<void> {
           });
         },
       });
+      sessionVoiceId = message.voiceId;
       scope.postMessage({ type: "ready" });
       break;
     }

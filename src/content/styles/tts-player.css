@@ -227,6 +227,11 @@
   background: var(--rt-surface-hover);
 }
 
+.tts-preview:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 /* Voice tier segmented control */
 
 .tts-tier {
