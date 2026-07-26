@@ -1,7 +1,7 @@
 {
   "name": "ao3-toybox",
   "type": "module",
-  "version": "3.16.1",
+  "version": "3.16.2",
   "private": true,
   "author": "Eden7600",
   "scripts": {
@@ -71,6 +71,7 @@
       "lefthook"
     ],
     "overrides": {
+      "brace-expansion@5": ">=5.0.8",
       "rollup": ">=4.59.0"
     }
   }
