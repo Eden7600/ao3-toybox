@@ -49,6 +49,43 @@
   outline-offset: 2px;
 }
 
+/* Conjoined stack: return-to-top above the settings gear in one pill.
+   The pill owns the border/shadow; the buttons flatten inside it. */
+
+.rt-fab-stack {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rt-border);
+  border-radius: 19px;
+  background: var(--rt-bg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.rt-fab-stack .rt-fab {
+  width: 36px;
+  height: 34px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.rt-fab-stack .rt-fab:hover {
+  transform: none;
+  box-shadow: none;
+  background: var(--rt-surface-hover);
+}
+
+.rt-fab-stack .rt-fab + .rt-fab {
+  border-top: 1px solid var(--rt-border);
+}
+
+/* The pill clips overflow, so the focus ring must sit inside it */
+.rt-fab-stack .rt-fab:focus-visible {
+  outline-offset: -2px;
+}
+
 /* Panel */
 
 .rt-panel {

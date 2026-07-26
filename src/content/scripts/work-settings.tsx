@@ -2,6 +2,7 @@ import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { ContentScript } from "../content-script";
 
+import ArrowUpIcon from "../components/arrow-up-icon";
 import CloseIcon from "../components/close-icon";
 import SettingsIcon from "../components/settings-icon";
 
@@ -133,9 +134,11 @@ const SettingsPanel = ({
 const ReadingSettingsUI = ({
   host,
   initialSettings,
+  showReturnToTop,
 }: {
   host: HTMLElement;
   initialSettings: ReadingSettings;
+  showReturnToTop: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<ReadingSettings>(initialSettings);
@@ -189,21 +192,41 @@ const ReadingSettingsUI = ({
     };
   }, [isOpen, host]);
 
+  const settingsTrigger = (
+    <button
+      ref={triggerRef}
+      class="rt-fab"
+      aria-label="Reading settings"
+      aria-haspopup="dialog"
+      aria-expanded={isOpen}
+      title="Customize your reading experience"
+      onClick={() => {
+        setIsOpen((prev) => !prev);
+      }}
+    >
+      <SettingsIcon />
+    </button>
+  );
+
   return (
     <>
-      <button
-        ref={triggerRef}
-        class="rt-fab"
-        aria-label="Reading settings"
-        aria-haspopup="dialog"
-        aria-expanded={isOpen}
-        title="Customize your reading experience"
-        onClick={() => {
-          setIsOpen((prev) => !prev);
-        }}
-      >
-        <SettingsIcon />
-      </button>
+      {showReturnToTop ? (
+        <div class="rt-fab-stack">
+          <button
+            class="rt-fab"
+            aria-label="Return to top"
+            title="Return to top"
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            <ArrowUpIcon />
+          </button>
+          {settingsTrigger}
+        </div>
+      ) : (
+        settingsTrigger
+      )}
       {isOpen && (
         <SettingsPanel
           settings={settings}
@@ -240,7 +263,11 @@ export default class WorkSettings extends ContentScript {
     });
 
     render(
-      <ReadingSettingsUI host={host} initialSettings={initialSettings} />,
+      <ReadingSettingsUI
+        host={host}
+        initialSettings={initialSettings}
+        showReturnToTop={this.settings.showReturnToTopButton}
+      />,
       root,
     );
   }

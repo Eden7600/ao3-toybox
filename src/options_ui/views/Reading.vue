@@ -117,6 +117,11 @@ const adoptWpm = (wpm: number) => {
         label="Repeat Toolbar Below Chapters"
         description="Show the work toolbar again at the bottom of the chapter, so subscribe, bookmark, share, and next chapter are at hand when you finish reading"
       />
+      <SettingsToggle
+        v-model="settings.showReturnToTopButton"
+        label="Return-to-Top Button"
+        description="Add a return-to-top button joined to the reading settings gear in the corner of work pages"
+      />
     </div>
   </div>
 

@@ -78,6 +78,7 @@ export type Settings = {
   enableModernBlurbs: boolean; // Modern card styling for work blurbs
 
   enableReaderSettings: boolean;
+  showReturnToTopButton: boolean; // Return-to-top button joined to the reading settings gear
 
   enableKeyboardPagination: boolean;
   enableKeyboardChapterNav: boolean;
@@ -167,6 +168,7 @@ export const defaultSettings: Settings = {
   enableModernBlurbs: true,
 
   enableReaderSettings: true,
+  showReturnToTopButton: true,
 
   enableKeyboardPagination: true,
   enableKeyboardChapterNav: true,
