@@ -20,8 +20,8 @@ export const PIPER_VOICES: PiperVoice[] = [
     sizeMB: 60,
   },
   {
-    id: "en_US-hfc_male-medium",
-    label: "Cole — US English, male",
+    id: "en_US-lessac-medium",
+    label: "Lessac — US English, female",
     lang: "en-US",
     sizeMB: 60,
   },
@@ -32,9 +32,21 @@ export const PIPER_VOICES: PiperVoice[] = [
     sizeMB: 60,
   },
   {
-    id: "en_US-lessac-medium",
-    label: "Lessac — US English, female",
+    id: "en_US-hfc_male-medium",
+    label: "Cole — US English, male",
     lang: "en-US",
+    sizeMB: 60,
+  },
+  {
+    id: "en_US-ryan-high",
+    label: "Ryan — US English, male (higher quality)",
+    lang: "en-US",
+    sizeMB: 115,
+  },
+  {
+    id: "en_GB-northern_english_male-medium",
+    label: "Arthur — Northern English, male",
+    lang: "en-GB",
     sizeMB: 60,
   },
 ];
