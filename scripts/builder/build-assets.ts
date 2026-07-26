@@ -32,4 +32,24 @@ export async function buildAssets(args: Args) {
       }
     }
   }
+
+  // Packaged wasm for the Piper read-aloud worker: shipping these in the
+  // package (rather than fetching from a CDN) is what keeps the enhanced
+  // voice tier inside the stores' no-remote-code rules. The ORT glue and
+  // binary versions must match the pinned onnxruntime-web dependency.
+  const ttsAssets = [
+    "onnxruntime-web/dist/ort-wasm-simd-threaded.jsep.mjs",
+    "onnxruntime-web/dist/ort-wasm-simd-threaded.jsep.wasm",
+    "@diffusionstudio/piper-wasm/build/piper_phonemize.wasm",
+    "@diffusionstudio/piper-wasm/build/piper_phonemize.data",
+  ];
+
+  for (const asset of ttsAssets) {
+    const target = resolve(outDir, "tts", asset.split("/").at(-1) ?? "");
+
+    // eslint-disable-next-line no-await-in-loop
+    await mkdir(dirname(target), { recursive: true });
+    // eslint-disable-next-line no-await-in-loop
+    await cp(resolve(process.cwd(), "node_modules", asset), target);
+  }
 }

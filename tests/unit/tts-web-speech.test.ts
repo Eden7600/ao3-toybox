@@ -118,11 +118,20 @@ describe("migrateTtsSettings", () => {
     });
 
     expect(migrated).toEqual({
+      tier: "system",
       voiceId: "Zira|en-US",
+      piperVoiceId: "en_US-hfc_female-medium",
       rate: 3,
       pitch: 0.5,
       highlightSentence: false,
       autoScroll: true,
     });
+  });
+
+  it("keeps a valid tier and piper voice, rejects unknown tiers", () => {
+    expect(
+      migrateTtsSettings({ tier: "piper", piperVoiceId: "en_GB-alba-medium" }),
+    ).toMatchObject({ tier: "piper", piperVoiceId: "en_GB-alba-medium" });
+    expect(migrateTtsSettings({ tier: "cloud" }).tier).toBe("system");
   });
 });

@@ -3,6 +3,7 @@ import { buildAssets } from "./build-assets";
 import { buildManifest } from "./build-manifest";
 import { buildScript } from "./build-script";
 import { buildVue } from "./build-vue";
+import { buildWorkers } from "./build-worker";
 import { cleanDist } from "./clean";
 import { detectScripts } from "./parse-manifest";
 
@@ -45,7 +46,7 @@ async function build() {
   );
 
   // Wait for everything to complete
-  await Promise.all([...scriptPromises, ...uiPromises]);
+  await Promise.all([...scriptPromises, ...uiPromises, buildWorkers(args)]);
 }
 
 await build();

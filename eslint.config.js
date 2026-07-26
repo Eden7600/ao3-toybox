@@ -428,7 +428,9 @@ const disableEslintRules = {
 
 export default tsEslint.config([
   {
-    ignores: ["**/dist/**", "**/node_modules/**"],
+    // Openspec/ is the gitignored change workspace — spike prototypes in
+    // there carry multi-megabyte bundled artifacts that stall typed linting
+    ignores: ["**/dist/**", "**/node_modules/**", "openspec/**"],
   },
   eslint.configs.recommended,
   {

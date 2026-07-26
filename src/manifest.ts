@@ -73,16 +73,25 @@ export default function (): PartialDeep<browser._manifest.WebExtensionManifest> 
         run_at: "document_start",
       },
     ],
-    // Firefox-only: the svg only ships in the Firefox package, and a
-    // declared-but-missing file risks store-validator rejections
-    ...(firefox && {
-      web_accessible_resources: [
-        {
-          resources: ["icons/icon.svg"],
-          matches: AO3_MATCH_PATTERNS,
-        },
-      ],
-    }),
+    web_accessible_resources: [
+      {
+        // The Piper read-aloud worker + its packaged wasm: fetched by the
+        // content script (worker/glue as blob workers, binaries by the
+        // ORT/emscripten loaders) from AO3 pages only
+        resources: ["content/tts-piper-worker.js", "tts/*"],
+        matches: AO3_MATCH_PATTERNS,
+      },
+      // Firefox-only: the svg only ships in the Firefox package, and a
+      // declared-but-missing file risks store-validator rejections
+      ...(firefox
+        ? [
+            {
+              resources: ["icons/icon.svg"],
+              matches: AO3_MATCH_PATTERNS,
+            },
+          ]
+        : []),
+    ],
     permissions: ["storage", "unlimitedStorage"],
     host_permissions: AO3_MATCH_PATTERNS,
     ...(firefox && {

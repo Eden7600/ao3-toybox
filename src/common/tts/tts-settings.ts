@@ -3,9 +3,15 @@
 // reading-settings. The single enableTts gate lives in settings-schema so
 // the popup/options can toggle the whole feature.
 
+export type TtsVoiceTier = "system" | "piper";
+
 export type TtsSettings = {
+  /** Which engine speaks: browser voices or the downloaded Piper voice. */
+  tier: TtsVoiceTier;
   /** Web-speech voice key (name|lang); null = best available default. */
   voiceId: string | null;
+  /** Curated Piper voice id (see piper-protocol PIPER_VOICES). */
+  piperVoiceId: string;
   rate: number;
   pitch: number;
   highlightSentence: boolean;
@@ -23,7 +29,9 @@ export const TTS_PITCH_MIN = 0.5;
 export const TTS_PITCH_MAX = 2;
 
 export const DEFAULT_TTS_SETTINGS: TtsSettings = {
+  tier: "system",
   voiceId: null,
+  piperVoiceId: "en_US-hfc_female-medium",
   rate: 1,
   pitch: 1,
   highlightSentence: true,
@@ -47,8 +55,16 @@ export function migrateTtsSettings(saved: unknown): TtsSettings {
   const record = saved as Record<string, unknown>;
   const settings: TtsSettings = { ...DEFAULT_TTS_SETTINGS };
 
+  if (record.tier === "system" || record.tier === "piper") {
+    settings.tier = record.tier;
+  }
+
   if (typeof record.voiceId === "string" && record.voiceId !== "") {
     settings.voiceId = record.voiceId;
+  }
+
+  if (typeof record.piperVoiceId === "string" && record.piperVoiceId !== "") {
+    settings.piperVoiceId = record.piperVoiceId;
   }
 
   if (typeof record.rate === "number" && Number.isFinite(record.rate)) {

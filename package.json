@@ -1,7 +1,7 @@
 {
   "name": "ao3-toybox",
   "type": "module",
-  "version": "3.9.0",
+  "version": "3.10.0",
   "private": true,
   "author": "Eden7600",
   "scripts": {
@@ -16,14 +16,17 @@
     "build:prod:chrome": "cross-env BROWSER=chrome NODE_ENV=production tsx scripts/builder/build.ts build"
   },
   "dependencies": {
+    "@diffusionstudio/piper-wasm": "1.0.0",
     "@iconoir/vue": "^7.11.1",
     "@lucide/vue": "^1.25.0",
     "@mdi/js": "^7.4.47",
+    "@mintplex-labs/piper-tts-web": "1.0.4",
     "@types/turndown": "^5.0.5",
     "bootstrap-icons": "^1.13.1",
     "dexie": "^4.4.4",
     "file-saver": "^2.0.5",
     "glob": "^13.0.6",
+    "onnxruntime-web": "1.27.0",
     "preact": "^10.29.7",
     "reka-ui": "^2.10.1",
     "turndown": "^7.2.4",
@@ -44,6 +47,7 @@
     "@webext-core/messaging": "3.0.2",
     "@webext-core/storage": "1.2.1",
     "cross-env": "^10.1.0",
+    "esbuild": "^0.28.1",
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
