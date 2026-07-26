@@ -17,6 +17,7 @@ import {
 } from "@src/common/work-status";
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
+import { TTS_OPEN_EVENT } from "@src/common/tts/tts-settings";
 import { ContentScript } from "../content-script";
 import {
   collectFeedbackActions,
@@ -355,6 +356,17 @@ const WorkToolbarUI = ({
           action={action}
         />
       ))}
+      {settings.enableTts && (
+        <button
+          class="rt-toolbar-btn"
+          title="Read this work aloud"
+          onClick={() => {
+            document.dispatchEvent(new CustomEvent(TTS_OPEN_EVENT));
+          }}
+        >
+          🎧 Listen
+        </button>
+      )}
       <span class="rt-toolbar-spacer" />
       {progressStore && (
         <ProgressSection

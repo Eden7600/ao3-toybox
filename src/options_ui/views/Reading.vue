@@ -122,6 +122,11 @@ const adoptWpm = (wpm: number) => {
         label="Return-to-Top Button"
         description="Add a return-to-top button joined to the reading settings gear in the corner of work pages"
       />
+      <SettingsToggle
+        v-model="settings.enableTts"
+        label="Read Aloud (Text-to-Speech)"
+        description="Add a listen player to work pages that reads the chapter aloud with your browser's voices — sentence highlighting, follow-along scrolling, and speed controls included"
+      />
     </div>
   </div>
 

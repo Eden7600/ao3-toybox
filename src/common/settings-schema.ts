@@ -79,6 +79,7 @@ export type Settings = {
 
   enableReaderSettings: boolean;
   showReturnToTopButton: boolean; // Return-to-top button joined to the reading settings gear
+  enableTts: boolean; // Read-aloud player on work pages
 
   enableKeyboardPagination: boolean;
   enableKeyboardChapterNav: boolean;
@@ -169,6 +170,7 @@ export const defaultSettings: Settings = {
 
   enableReaderSettings: true,
   showReturnToTopButton: true,
+  enableTts: false,
 
   enableKeyboardPagination: true,
   enableKeyboardChapterNav: true,
