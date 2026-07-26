@@ -151,4 +151,39 @@ describe("PiperWorkerClient", () => {
     // Abandoning with nothing in flight is a no-op
     client.abandonPending();
   });
+
+  it("clearQueue cancels unposted requests without touching the active one", async () => {
+    const { worker, respond } = fakeWorker();
+    const client = clientWith(worker);
+
+    const active = client.request(
+      { type: "synthesize", id: 1, text: "one" },
+      ["audio"],
+      1,
+    );
+    const queued = client.request(
+      { type: "synthesize", id: 2, text: "two" },
+      ["audio"],
+      2,
+    );
+
+    await drain();
+    expect(worker.posted).toHaveLength(1);
+
+    // A seek clears the queue: the stale prefetch never reaches the
+    // worker, but the active request still settles normally
+    client.clearQueue();
+    respond({ type: "audio", id: 1, buffer: new ArrayBuffer(1) });
+    await expect(active).resolves.toMatchObject({ type: "audio", id: 1 });
+    await expect(queued).rejects.toBeInstanceOf(PiperCancelledError);
+    await drain();
+    expect(worker.posted).toHaveLength(1);
+
+    // Requests made after the clear run normally
+    const fresh = client.request({ type: "stored" }, ["stored"]);
+
+    await drain();
+    respond({ type: "stored", voices: [] });
+    await expect(fresh).resolves.toMatchObject({ type: "stored" });
+  });
 });

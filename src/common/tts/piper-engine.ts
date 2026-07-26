@@ -19,6 +19,7 @@ import type {
   PiperWorkerRequest,
   PiperWorkerResponse,
 } from "./piper-protocol";
+import { chunkForSynthesis } from "./speech-text";
 
 /** Locations of the packaged pieces, resolved by the caller via
  *  runtime.getURL (the engine itself stays extension-API-free and
@@ -180,12 +181,22 @@ export class PiperWorkerClient {
     };
   }
 
+  /** Bumped by clearQueue(); queued-but-unposted requests from an
+   *  older epoch cancel instead of reaching the worker. */
+  private queueEpoch = 0;
+
   request(
     message: PiperWorkerRequest,
     accepts: string[],
     matchId?: number,
   ): Promise<PiperWorkerResponse> {
+    const epoch = this.queueEpoch;
+
     const run = async (): Promise<PiperWorkerResponse> => {
+      if (epoch !== this.queueEpoch) {
+        throw new PiperCancelledError();
+      }
+
       const worker = await this.ensureWorker();
 
       return new Promise((resolve, reject) => {
@@ -202,8 +213,14 @@ export class PiperWorkerClient {
     return result;
   }
 
+  /** Cancels queued requests that have not reached the worker yet —
+   *  a seek must not wait behind stale prefetch synthesis. */
+  clearQueue(): void {
+    this.queueEpoch++;
+  }
+
   /** Rejects the in-flight request as cancelled; the worker's late
-   *  response is ignored when it arrives. Queued requests proceed. */
+   *  response is ignored when it arrives. */
   abandonPending(): void {
     const { pending } = this;
 
@@ -214,6 +231,7 @@ export class PiperWorkerClient {
   dispose(): void {
     this.worker?.terminate();
     this.worker = null;
+    this.clearQueue();
     this.abandonPending();
   }
 }
@@ -223,8 +241,9 @@ export function wavDurationSeconds(byteLength: number, sampleRate: number) {
   return Math.max(0, byteLength - 44) / (sampleRate * 2);
 }
 
-/** Synthesized sentences kept decoded and ready to play. */
-const AUDIO_CACHE_LIMIT = 4;
+/** Synthesized chunks kept decoded and ready to play. Chunks are at
+ *  most SYNTHESIS_CHUNK_LIMIT chars, so this stays small in memory. */
+const AUDIO_CACHE_LIMIT = 8;
 
 export class PiperSpeechEngine implements SpeechEngine {
   private readonly client: PiperWorkerClient;
@@ -311,30 +330,84 @@ export class PiperSpeechEngine implements SpeechEngine {
     void this.ensureReady().catch(ignoreRejection);
   }
 
+  /** The sentence expected after the current one. Stored, not acted on:
+   *  its chunks are queued when the current sentence's LAST chunk starts
+   *  playing, so the current sentence's own chunks always synthesize
+   *  first. */
+  private hint: string | null = null;
+
   prefetch(text: string): void {
-    // Fire-and-forget: the result lands in the cache; failures (incl.
-    // cancellation) just mean the later speak() synthesizes again.
-    // Chained behind init so even the very first transition is gapless.
-    void this.ensureReady()
-      .then(() => this.audioFor(text))
-      .catch(ignoreRejection);
+    this.hint = text;
   }
 
-  async speak(text: string, options: SpeakOptions): Promise<boolean> {
-    let buffer: AudioBuffer;
+  private fireHint(): void {
+    const { hint } = this;
 
+    this.hint = null;
+
+    if (hint === null) {
+      return;
+    }
+
+    for (const chunk of chunkForSynthesis(hint)) {
+      // Fire-and-forget: results land in the cache; failures (incl.
+      // cancellation) just mean the later speak() synthesizes again
+      this.audioFor(chunk).catch(ignoreRejection);
+    }
+  }
+
+  /**
+   * Long sentences play as pipelined clause chunks: while chunk N plays,
+   * chunk N+1 synthesizes — audio starts after the first clause instead
+   * of after the whole sentence.
+   */
+  async speak(text: string, options: SpeakOptions): Promise<boolean> {
     try {
       await this.ensureReady();
-      buffer = await this.audioFor(text);
     } catch (error) {
       if (error instanceof PiperCancelledError) {
-        // Cancelled while synthesizing — the engine contract's "false"
         return false;
       }
 
       throw error;
     }
 
+    const chunks = chunkForSynthesis(text);
+    let upcoming: Promise<AudioBuffer> = this.audioFor(chunks[0]);
+
+    for (let index = 0; index < chunks.length; index++) {
+      let buffer: AudioBuffer;
+
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        buffer = await upcoming;
+      } catch (error) {
+        if (error instanceof PiperCancelledError) {
+          // Cancelled while synthesizing — the engine contract's "false"
+          return false;
+        }
+
+        throw error;
+      }
+
+      if (index + 1 < chunks.length) {
+        upcoming = this.audioFor(chunks[index + 1]);
+      } else {
+        this.fireHint();
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      const played = await this.playBuffer(buffer, options.rate);
+
+      if (!played) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private async playBuffer(buffer: AudioBuffer, rate: number) {
     const context = this.ensureContext();
 
     if (context.state === "suspended") {
@@ -346,7 +419,7 @@ export class PiperSpeechEngine implements SpeechEngine {
 
       source.buffer = buffer;
       // Rate via playback speed; Piper voices have no native rate knob
-      source.playbackRate.value = Math.min(Math.max(options.rate, 0.5), 3);
+      source.playbackRate.value = Math.min(Math.max(rate, 0.5), 3);
       source.connect(context.destination);
 
       let cancelled = false;
@@ -370,11 +443,14 @@ export class PiperSpeechEngine implements SpeechEngine {
   }
 
   cancel(): void {
-    // A pending synthesis result is abandoned; a playing source stops
-    // and resolves its speak() promise with false via onended
+    // Queued (prefetch) synthesis is cleared so a seek starts fresh, the
+    // pending result is abandoned, and a playing source stops — which
+    // resolves its speak() promise with false via onended
+    this.client.clearQueue();
     this.client.abandonPending();
     this.cancelActive?.();
     this.cancelActive = null;
+    this.hint = null;
   }
 
   dispose(): void {

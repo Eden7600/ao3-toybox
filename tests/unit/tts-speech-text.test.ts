@@ -1,4 +1,8 @@
-import { speechText, speechTextOrBeat } from "@src/common/tts/speech-text";
+import {
+  chunkForSynthesis,
+  speechText,
+  speechTextOrBeat,
+} from "@src/common/tts/speech-text";
 import { describe, expect, it } from "vitest";
 
 describe("speechText", () => {
@@ -74,6 +78,53 @@ describe("speechText", () => {
 
   it("normalizes whitespace including non-breaking spaces", () => {
     expect(speechText("one\u00a0two   three")).toBe("one two three");
+  });
+});
+
+describe("chunkForSynthesis", () => {
+  it("passes short sentences through whole", () => {
+    expect(chunkForSynthesis("A short one.")).toEqual(["A short one."]);
+  });
+
+  it("splits long sentences at clause boundaries within the limit", () => {
+    const clause = "she walked the long corridor toward the far door";
+    const text = `${clause}, ${clause}, ${clause}, and ${clause}.`;
+    const chunks = chunkForSynthesis(text);
+
+    expect(chunks.length).toBeGreaterThan(1);
+
+    for (const chunk of chunks) {
+      expect(chunk.length).toBeLessThanOrEqual(160 + 35);
+    }
+
+    // Reconstruction: separators stay with their leading chunk
+    expect(chunks.join(" ")).toBe(text);
+  });
+
+  it("falls back to word boundaries without punctuation", () => {
+    const text = `${"word ".repeat(60)}end`.trim();
+    const chunks = chunkForSynthesis(text);
+
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.join(" ")).toBe(text);
+    expect(chunks.every((chunk) => !chunk.startsWith(" "))).toBe(true);
+  });
+
+  it("hard-cuts pathological unbroken runs without losing content", () => {
+    const text = "a".repeat(500);
+    const chunks = chunkForSynthesis(text);
+
+    expect(chunks.length).toBeGreaterThan(1);
+    // The stub-tail glue may insert a space; no characters may be lost
+    expect(chunks.join("").replace(/\s+/g, "")).toBe(text);
+  });
+
+  it("glues stub tails to the previous chunk", () => {
+    const clause = "she walked the long corridor toward the very far door";
+    const text = `${clause}, ${clause}, ok.`;
+    const chunks = chunkForSynthesis(text);
+
+    expect(chunks.at(-1)?.length).toBeGreaterThanOrEqual(30);
   });
 });
 

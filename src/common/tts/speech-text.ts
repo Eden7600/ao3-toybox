@@ -72,6 +72,67 @@ export function speechText(text: string): string {
   return spoken;
 }
 
+/** Synthesis chunk ceiling, in characters (~10 s of speech). */
+export const SYNTHESIS_CHUNK_LIMIT = 160;
+
+/** Splits below this stay glued to the previous chunk. */
+const MIN_CHUNK_TAIL = 30;
+
+/**
+ * Split one long sentence into synthesis-sized chunks at clause
+ * boundaries (semicolons, then commas, then plain spaces, then a hard
+ * cut). Piper's synthesis time is roughly linear in length, so chunking
+ * lets audio start after the first clause while the rest synthesizes
+ * during playback. Separator punctuation stays with the leading chunk
+ * so the voice still lands its pause.
+ */
+export function chunkForSynthesis(
+  text: string,
+  limit = SYNTHESIS_CHUNK_LIMIT,
+): string[] {
+  const trimmed = text.trim();
+
+  if (trimmed.length <= limit) {
+    return [trimmed];
+  }
+
+  const chunks: string[] = [];
+  let rest = trimmed;
+
+  while (rest.length > limit) {
+    const window = rest.slice(0, limit);
+    const clause = Math.max(window.lastIndexOf("; "), window.lastIndexOf(", "));
+
+    if (clause >= MIN_CHUNK_TAIL) {
+      chunks.push(rest.slice(0, clause + 1));
+      rest = rest.slice(clause + 2);
+      continue;
+    }
+
+    const space = window.lastIndexOf(" ");
+
+    if (space >= MIN_CHUNK_TAIL) {
+      chunks.push(rest.slice(0, space));
+      rest = rest.slice(space + 1);
+      continue;
+    }
+
+    chunks.push(window);
+    rest = rest.slice(limit);
+  }
+
+  if (rest !== "") {
+    // A stub tail sounds clipped — glue it to the previous chunk
+    if (rest.length < MIN_CHUNK_TAIL && chunks.length > 0) {
+      chunks[chunks.length - 1] += ` ${rest}`;
+    } else {
+      chunks.push(rest);
+    }
+  }
+
+  return chunks;
+}
+
 /**
  * Engine-safe spoken form: sentences that dissolve entirely (a merged
  * scene divider with no prose) become a bare period — a beat of near
