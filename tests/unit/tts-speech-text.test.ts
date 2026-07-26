@@ -55,16 +55,16 @@ describe("speechText", () => {
 
   it("speaks the letter A as a letter, never the article", () => {
     expect(speechText("He got an A+ on the final.")).toBe(
-      "He got an Ay plus on the final.",
+      "He got an ayy plus on the final.",
     );
     expect(speechText("She scraped an A- somehow.")).toBe(
-      "She scraped an Ay minus somehow.",
+      "She scraped an ayy minus somehow.",
     );
     expect(speechText("The A-list crowd arrived.")).toBe(
-      "The Ay-list crowd arrived.",
+      "The ayy-list crowd arrived.",
     );
-    expect(speechText("Plan A failed.")).toBe("Plan Ay failed.");
-    expect(speechText("It was an A.")).toBe("It was an Ay.");
+    expect(speechText("Plan A failed.")).toBe("Plan ayy failed.");
+    expect(speechText("It was an A.")).toBe("It was an ayy.");
   });
 
   it("leaves the article A alone, capitalized or shouted", () => {

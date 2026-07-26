@@ -34,12 +34,12 @@ export function speechText(text: string): string {
   // The standalone rule needs a preceding lowercase word and a
   // non-capitalized continuation, so the capitalized article ("A dog
   // barked.", title-case headings) never matches
-  spoken = spoken.replace(/\bA\+/gu, "Ay plus");
-  spoken = spoken.replace(/\bA-(?=$|[\s,.!?;:'"”’)])/gu, "Ay minus");
-  spoken = spoken.replace(/\bA(?=-\p{L})/gu, "Ay");
+  spoken = spoken.replace(/\bA\+/gu, "ayy plus");
+  spoken = spoken.replace(/\bA-(?=$|[\s,.!?;:'"”’)])/gu, "ayy minus");
+  spoken = spoken.replace(/\bA(?=-\p{L})/gu, "ayy");
   spoken = spoken.replace(
     /(?<=\p{Ll}\s)A(?=$|[,.!?;:'"”’)]|\s+\p{Ll})/gu,
-    "Ay",
+    "ayy",
   );
 
   // Ellipses: a leading one is a trailing-off pickup (drop it), one
