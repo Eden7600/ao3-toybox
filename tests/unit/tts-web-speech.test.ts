@@ -139,4 +139,10 @@ describe("migrateTtsSettings", () => {
     ).toMatchObject({ tier: "piper", piperVoiceId: "en_GB-alba-medium" });
     expect(migrateTtsSettings({ tier: "cloud" }).tier).toBe("system");
   });
+
+  it("falls back to the default voice when a saved voice leaves the list", () => {
+    expect(
+      migrateTtsSettings({ piperVoiceId: "en_US-ryan-high" }),
+    ).toMatchObject({ piperVoiceId: "en_US-hfc_female-medium" });
+  });
 });

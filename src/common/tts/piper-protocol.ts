@@ -38,10 +38,10 @@ export const PIPER_VOICES: PiperVoice[] = [
     sizeMB: 60,
   },
   {
-    id: "en_US-ryan-high",
-    label: "Ryan — US English, male (higher quality)",
+    id: "en_US-joe-medium",
+    label: "Joe — US English, male",
     lang: "en-US",
-    sizeMB: 115,
+    sizeMB: 60,
   },
   {
     id: "en_GB-northern_english_male-medium",

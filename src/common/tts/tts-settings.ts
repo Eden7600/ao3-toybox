@@ -3,6 +3,8 @@
 // reading-settings. The single enableTts gate lives in settings-schema so
 // the popup/options can toggle the whole feature.
 
+import { piperVoiceById } from "./piper-protocol";
+
 export type TtsVoiceTier = "system" | "piper";
 
 export type TtsSettings = {
@@ -70,7 +72,11 @@ export function migrateTtsSettings(saved: unknown): TtsSettings {
     settings.voiceId = record.voiceId;
   }
 
-  if (typeof record.piperVoiceId === "string" && record.piperVoiceId !== "") {
+  // A voice dropped from the curated list falls back to the default
+  if (
+    typeof record.piperVoiceId === "string" &&
+    piperVoiceById(record.piperVoiceId) !== null
+  ) {
     settings.piperVoiceId = record.piperVoiceId;
   }
 
