@@ -49,6 +49,21 @@ export const PIPER_VOICES: PiperVoice[] = [
     lang: "en-GB",
     sizeMB: 60,
   },
+  // Low-quality tier: same download size, but 16 kHz synthesis needs
+  // roughly a quarter less compute — for devices that can't keep up
+  // with the medium voices (no English x_low models exist upstream)
+  {
+    id: "en_US-amy-low",
+    label: "Amy — US English, female (faster, lower quality)",
+    lang: "en-US",
+    sizeMB: 60,
+  },
+  {
+    id: "en_US-danny-low",
+    label: "Danny — US English, male (faster, lower quality)",
+    lang: "en-US",
+    sizeMB: 60,
+  },
 ];
 
 export function piperVoiceById(id: string): PiperVoice | null {
