@@ -76,6 +76,21 @@ describe("speechText", () => {
     expect(speechText("IT WAS A TRAP")).toBe("IT WAS A TRAP");
   });
 
+  it("strips zalgo mark stacks but keeps real accents", () => {
+    expect(
+      speechText(
+        "H\u0338\u0322\u032a\u032fe\u0322\u0324 c\u0336\u0323o\u0335\u0349m\u0334\u031de\u0337\u0339s\u0338\u0324.",
+      ),
+    ).toBe("He comes.");
+    // A decomposed accent composes via NFC instead of being stripped
+    expect(speechText("cafe\u0301 au lait")).toBe("caf\u00e9 au lait");
+    expect(speechText("na\u00efve Chlo\u00eb")).toBe("na\u00efve Chlo\u00eb");
+  });
+
+  it("drops combining marks riding on spaces", () => {
+    expect(speechText("he \u0360 left")).toBe("he left");
+  });
+
   it("normalizes whitespace including non-breaking spaces", () => {
     expect(speechText("one\u00a0two   three")).toBe("one two three");
   });

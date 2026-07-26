@@ -12,6 +12,16 @@ const EMPHASIS_WRAP = /([*_])(\p{L}[^*_]{0,60}?)\1/gu;
  *  Hyphen-run dividers fall to the dash rule instead. */
 const DIVIDER_RUN = /(?:[*~#=•·^]\s*){2,}/gu;
 
+/** Zalgo: stacked combining marks used as decoration. After NFC folds
+ *  real accents into precomposed characters, a run of two or more
+ *  leftover nonspacing/enclosing marks is never orthography. A single
+ *  leftover mark stays — some scripts have no precomposed form. */
+const ZALGO_STACK = /[\p{Mn}\p{Me}]{2,}/gu;
+
+/** A combining mark with no letter to combine with (riding a space or
+ *  the string start) is always decoration. */
+const ORPHAN_MARK = /(?<=^|\s)[\p{Mn}\p{Me}]+/gu;
+
 const ELLIPSIS = /(?:\.{3,}|…)/gu;
 
 /** Em/en dashes, double hyphens, and spaced single hyphens used as
@@ -24,8 +34,10 @@ const DASH_BREAK = /\s*(?:—|–|--+)\s*|\s+-\s+/gu;
  * needs no repair passes through unchanged.
  */
 export function speechText(text: string): string {
-  let spoken = text.replace(/\s+/gu, " ").trim();
+  let spoken = text.normalize("NFC").replace(/\s+/gu, " ").trim();
 
+  spoken = spoken.replace(ZALGO_STACK, "");
+  spoken = spoken.replace(ORPHAN_MARK, "");
   spoken = spoken.replace(EMPHASIS_WRAP, "$2");
   spoken = spoken.replace(DIVIDER_RUN, " ");
 
