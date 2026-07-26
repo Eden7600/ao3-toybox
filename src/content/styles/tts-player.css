@@ -36,6 +36,13 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
+/* The 16px default suits the compact cluster buttons; the fab is a
+   full-size corner segment and matches the reading fab's 18px icon */
+.tts-fab svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Corner-dock fusing: collapsed, the trigger is a segment of the
    corner pill (data-dock-pos stamped by the dock; see work-settings.css
    for the scheme). Open, the host detaches and these rules idle. */
