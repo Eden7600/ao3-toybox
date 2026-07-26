@@ -1,4 +1,5 @@
 import {
+  arrangeToolbar,
   toolbarBadgeFor,
   toolbarIconIdFor,
   toolbarShortLabelFor,
@@ -46,5 +47,63 @@ describe("toolbarBadgeFor", () => {
     expect(toolbarBadgeFor("Comments (42)")).toBe("42");
     expect(toolbarBadgeFor("Comments")).toBeNull();
     expect(toolbarBadgeFor("Share")).toBeNull();
+  });
+});
+
+describe("arrangeToolbar", () => {
+  const item = (label: string) => ({ label });
+
+  it("sorts AO3's markup order into navigation, work actions, utility", () => {
+    // The order AO3's nav + the feedback extras actually arrive in
+    const arrived = [
+      "Chapter Index",
+      "Entire Work",
+      "← Previous Chapter",
+      "Next Chapter →",
+      "Share",
+      "Download",
+      "Subscribe",
+      "Mark for Later",
+      "Bookmark",
+      "Comments (42)",
+      "Hide Creator's Style",
+      "↑ Top",
+      "Kudos ♥",
+    ].map(item);
+
+    const groups = arrangeToolbar(arrived);
+
+    expect(groups.map((group) => group.map((entry) => entry.label))).toEqual([
+      [
+        "← Previous Chapter",
+        "Next Chapter →",
+        "Entire Work",
+        "Chapter Index",
+        "↑ Top",
+      ],
+      ["Kudos ♥", "Bookmark", "Subscribe", "Mark for Later"],
+      ["Comments (42)", "Share", "Download", "Hide Creator's Style"],
+    ]);
+  });
+
+  it("puts unknown labels at the end of the utility group", () => {
+    const groups = arrangeToolbar(
+      ["Some Future AO3 Button", "Next Chapter →", "Share"].map(item),
+    );
+
+    expect(groups.at(-1)?.map((entry) => entry.label)).toEqual([
+      "Share",
+      "Some Future AO3 Button",
+    ]);
+  });
+
+  it("emits no empty groups and keeps stable order for ties", () => {
+    const groups = arrangeToolbar(["Share", "Comments"].map(item));
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].map((entry) => entry.label)).toEqual([
+      "Comments",
+      "Share",
+    ]);
   });
 });

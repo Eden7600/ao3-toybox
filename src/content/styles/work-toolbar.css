@@ -104,6 +104,15 @@
   flex: 1;
 }
 
+/* Hairline between the toolbar's action groups */
+
+.rt-toolbar-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 3px 0;
+  background: var(--rt-border);
+}
+
 /* Adopted native controls: anchors share the button look */
 
 a.rt-toolbar-btn {

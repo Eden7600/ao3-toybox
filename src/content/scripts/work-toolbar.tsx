@@ -15,10 +15,11 @@ import {
   workPageProgress,
   type WorkPageProgress,
 } from "@src/common/work-status";
-import { render } from "preact";
+import { Fragment, render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { ContentScript } from "../content-script";
 import {
+  arrangeToolbar,
   toolbarBadgeFor,
   ToolbarIcon,
   toolbarIconIdFor,
@@ -408,13 +409,22 @@ const WorkToolbarUI = ({
       <span class="rt-toolbar-brand" title="AO3 Toybox work toolbar">
         Toybox
       </span>
-      {[...nativeActions, ...extraActions].map((action) => (
-        <NativeActionButton
-          key={`${action.kind}-${action.label}`}
-          action={action}
-          compact={settings.compactWorkToolbar}
-        />
-      ))}
+      {arrangeToolbar([...nativeActions, ...extraActions]).map(
+        (group, groupIndex) => (
+          <Fragment key={group[0].label}>
+            {groupIndex > 0 && (
+              <span class="rt-toolbar-divider" aria-hidden="true" />
+            )}
+            {group.map((action) => (
+              <NativeActionButton
+                key={`${action.kind}-${action.label}`}
+                action={action}
+                compact={settings.compactWorkToolbar}
+              />
+            ))}
+          </Fragment>
+        ),
+      )}
       <span class="rt-toolbar-spacer" />
       {progressStore && (
         <ProgressSection

@@ -45,6 +45,79 @@ export function toolbarBadgeFor(label: string): string | null {
   return match ? match[1] : null;
 }
 
+/**
+ * Canonical toolbar order, independent of AO3's markup order. Three
+ * groups, separated by dividers:
+ *
+ *   0 reading navigation — previous/next first (the highest-frequency
+ *     actions), then the view switches, index, and back-to-top;
+ *   1 work actions that change the reader's relationship to the work —
+ *     kudos, bookmark, subscribe, mark for later;
+ *   2 utility — comments, share, download, creator-style toggle, and
+ *     any label we do not recognize (new AO3 controls land here, at the
+ *     end, instead of scrambling the groups).
+ */
+const ORDER_RULES: Array<{ pattern: RegExp; group: number; rank: number }> = [
+  { pattern: /^← ?previous chapter/, group: 0, rank: 0 },
+  { pattern: /^next chapter/, group: 0, rank: 1 },
+  { pattern: /^entire work$/, group: 0, rank: 2 },
+  { pattern: /^chapter by chapter$/, group: 0, rank: 2 },
+  { pattern: /^chapter index/, group: 0, rank: 3 },
+  { pattern: /^↑ ?top$/, group: 0, rank: 4 },
+  { pattern: /^kudos/, group: 1, rank: 0 },
+  { pattern: /^bookmark/, group: 1, rank: 1 },
+  { pattern: /^(un)?subscribe/, group: 1, rank: 2 },
+  { pattern: /^mark (for later|as read)/, group: 1, rank: 3 },
+  { pattern: /^comment/, group: 2, rank: 0 },
+  { pattern: /^share/, group: 2, rank: 1 },
+  { pattern: /^download/, group: 2, rank: 2 },
+  { pattern: /^(hide|show) creator/, group: 2, rank: 3 },
+];
+
+const UNRECOGNIZED = { group: 2, rank: 9 };
+
+export function toolbarOrderFor(label: string): {
+  group: number;
+  rank: number;
+} {
+  const clean = label.replace(/\s+/g, " ").trim().toLowerCase();
+
+  return ORDER_RULES.find((rule) => rule.pattern.test(clean)) ?? UNRECOGNIZED;
+}
+
+/**
+ * Sorts labeled items into the canonical order and buckets them into
+ * consecutive groups (for divider rendering). The sort is stable:
+ * same-rank items keep their native relative order.
+ */
+export function arrangeToolbar<T extends { label: string }>(
+  items: readonly T[],
+): T[][] {
+  const decorated = items.map((item, index) => ({
+    item,
+    index,
+    ...toolbarOrderFor(item.label),
+  }));
+
+  decorated.sort(
+    (a, b) => a.group - b.group || a.rank - b.rank || a.index - b.index,
+  );
+
+  const groups: T[][] = [];
+  let currentGroup = -1;
+
+  for (const entry of decorated) {
+    if (entry.group !== currentGroup) {
+      groups.push([]);
+      currentGroup = entry.group;
+    }
+
+    groups[groups.length - 1].push(entry.item);
+  }
+
+  return groups;
+}
+
 const PATHS: Record<ToolbarIconId, string> = {
   share: "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v13",
   download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3",
