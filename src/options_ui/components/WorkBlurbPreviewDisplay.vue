@@ -354,7 +354,7 @@ function statsHtml(work: SampleWork, settings: Settings): string {
 
   if (settings.showBlurbReadingTime && minutes !== null) {
     extras.push(
-      `<dt class="toybox-stat toybox-reading-time">Reading Time:</dt><dd class="toybox-stat toybox-reading-time">${formatReadingTime(minutes)}</dd>`,
+      `<dt class="toybox-stat toybox-reading-time">Reading&nbsp;Time:</dt><dd class="toybox-stat toybox-reading-time">${formatReadingTime(minutes)}</dd>`,
     );
   }
 
@@ -362,7 +362,7 @@ function statsHtml(work: SampleWork, settings: Settings): string {
     const now = new Date();
 
     extras.push(
-      `<dt class="toybox-stat toybox-finish-at">Finish At:</dt><dd class="toybox-stat toybox-finish-at">${escapeHtml(formatFinishAt(finishReadingAt(now, minutes), now))}</dd>`,
+      `<dt class="toybox-stat toybox-finish-at">Finish&nbsp;At:</dt><dd class="toybox-stat toybox-finish-at">${escapeHtml(formatFinishAt(finishReadingAt(now, minutes), now))}</dd>`,
     );
   }
 

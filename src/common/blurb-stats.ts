@@ -11,6 +11,17 @@
  * that reads stats keeps working, and display:none stats (hidden
  * language line) produce no column. Shared by the stat-layout content
  * script and the options blurb preview.
+ *
+ * A column-flow grid cannot wrap, so on narrow screens the same
+ * children reflow into label/value rows, fitting as many pairs per row
+ * as the width allows: the auto-fit repeat unit is a label track plus
+ * a value track, so the track count stays even and dt/dd pairing never
+ * splits across a row. Auto-repetition needs fixed-size floors, so the
+ * label track floors at the widest injected label ("Words/Chapter:")
+ * and grows to max-content from there. The breakpoint mirrors AO3's
+ * own midsize (62em) sheet, which never touches blurb stats itself.
+ * Theme-independent: the selectors outrank both theme families and the
+ * default skin at every width.
  */
 export const STACKED_STATS_CSS = `
 li.work.blurb.group dl.stats {
@@ -37,6 +48,36 @@ li.work.blurb.group dl.stats dt {
 
 li.work.blurb.group dl.stats dd {
   grid-row: 2;
+}
+
+@media only screen and (max-width: 62em) {
+  li.work.blurb.group dl.stats {
+    float: none;
+    text-align: left;
+    grid-auto-flow: row;
+    grid-template-rows: none;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(7.5em, max-content) minmax(3.5em, 1fr)
+    );
+    column-gap: 0.5em;
+    row-gap: 0.25em;
+  }
+
+  li.work.blurb.group dl.stats dt,
+  li.work.blurb.group dl.stats dd {
+    grid-row: auto;
+  }
+
+  /* Long values (language names) wrap inside their track instead of
+     overlapping the next label; injected values stay whole */
+  li.work.blurb.group dl.stats dd {
+    white-space: normal;
+  }
+
+  li.work.blurb.group dl.stats dd.toybox-stat {
+    white-space: nowrap;
+  }
 }
 `;
 

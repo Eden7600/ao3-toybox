@@ -378,3 +378,21 @@ dl.stats dd {
   clear: both;
   visibility: hidden;
 }
+
+/*
+ * AO3's own midsize/narrow behavior (4_site_midsize / 5_site_narrow),
+ * so narrow previews track the live site: fluid #main gutters and the
+ * narrow font step-down.
+ */
+@media only screen and (max-width: 62em) {
+  #main {
+    padding-left: 3.5%;
+    padding-right: 3.5%;
+  }
+}
+
+@media only screen and (max-width: 42em) {
+  #outer {
+    font-size: 0.875em;
+  }
+}

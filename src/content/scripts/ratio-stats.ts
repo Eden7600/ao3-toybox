@@ -107,7 +107,7 @@ export default class RatioStats extends ContentScript {
         this.appendStat(
           stats,
           "toybox-reading-time",
-          "Reading Time:",
+          "Reading\u00A0Time:",
           formatReadingTime(minutes),
         )
       ) {
@@ -119,7 +119,7 @@ export default class RatioStats extends ContentScript {
         const finishAt = this.appendStat(
           stats,
           "toybox-finish-at",
-          "Finish At:",
+          "Finish\u00A0At:",
           formatFinishAt(finishReadingAt(now, minutes), now),
         );
 

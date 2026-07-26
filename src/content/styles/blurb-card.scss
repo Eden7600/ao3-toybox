@@ -123,3 +123,36 @@
 #main li.work.blurb.group dl.stats dd.toybox-stat {
   color: var(--ao3-accent-color-light, #990000);
 }
+
+/*
+ * Narrow screens: the default skin floats blurb stats right and AO3's
+ * own narrow sheets never unfloat them, so the footer hairline would
+ * hug a shrink-wrapped right-aligned column. Full-width left-aligned
+ * flow reads as a card footer in both stats layouts. Container-level
+ * only — pair layout still belongs to AO3's inline flow or the
+ * stacked-stats grid (which applies the same unfloat itself for the
+ * card-off case).
+ *
+ * Page gutters and card padding also slim down: AO3's midsize sheet
+ * keeps 3.5% #main gutters all the way down, which together with the
+ * card's desktop padding eats too much of a phone viewport. The theme
+ * families apply the same #main values for the card-off case —
+ * identical, so overlap is harmless.
+ */
+@media only screen and (max-width: 62em) {
+  #main,
+  #main.dashboard {
+    padding-left: 2%;
+    padding-right: 2%;
+  }
+
+  #main li.work.blurb.group {
+    padding: 0.8em 0.85em 0.7em;
+    margin: 0 0 0.8em;
+  }
+
+  #main li.work.blurb.group dl.stats {
+    float: none;
+    text-align: left;
+  }
+}

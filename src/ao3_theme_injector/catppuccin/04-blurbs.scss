@@ -123,3 +123,18 @@ ul.required-tags,
 .bookmark .count a {
   color: var(--ctp-blue);
 }
+
+/* Narrow screens: slim AO3's 3.5% #main gutters and the blurb's 1em
+   side padding — together they eat too much of a phone viewport. The
+   blurb card applies the same #main values when it's enabled. */
+@media only screen and (max-width: 62em) {
+  #main,
+  #main.dashboard {
+    padding-left: 2%;
+    padding-right: 2%;
+  }
+
+  #main li.blurb {
+    padding: 0.6em 0.7em;
+  }
+}
