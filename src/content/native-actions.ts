@@ -116,6 +116,35 @@ function actionFromLi(li: HTMLLIElement): NativeAction | null {
 }
 
 /**
+ * Bottom feedback actions (otwarchive's _feedback partial) the toolbar
+ * doesn't already carry from the header navigation: the kudos form and
+ * the back-to-top link. The list's chapter and comments lis duplicate
+ * header-nav actions, so they are skipped — hiding the native list is
+ * only safe when the header adoption succeeded and covers them.
+ */
+export function collectFeedbackActions(list: HTMLElement): NativeAction[] {
+  const actions: NativeAction[] = [];
+
+  list.querySelectorAll<HTMLLIElement>(":scope > li").forEach((li) => {
+    const adoptable =
+      li.querySelector('form input[type="submit"]') ??
+      li.querySelector('a[href="#main"]');
+
+    if (!adoptable || insideNoscript(adoptable)) {
+      return;
+    }
+
+    const action = actionFromLi(li);
+
+    if (action) {
+      actions.push(action);
+    }
+  });
+
+  return actions;
+}
+
+/**
  * Classifies every li of the native navigation list. Unrecognizable lis
  * are skipped; callers should only hide the native list when at least one
  * action was recovered.

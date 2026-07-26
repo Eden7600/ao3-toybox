@@ -1,4 +1,7 @@
-import { collectNativeActions } from "@src/content/native-actions";
+import {
+  collectFeedbackActions,
+  collectNativeActions,
+} from "@src/content/native-actions";
 import { beforeEach, describe, expect, it } from "vitest";
 
 // Mirrors otwarchive's _work_header_navigation partial: chapter index
@@ -144,5 +147,88 @@ describe("collectNativeActions", () => {
     if (!nav) throw new Error("fixture failed");
 
     expect(collectNativeActions(nav, "999")).toEqual([]);
+  });
+});
+
+// Mirrors otwarchive's _feedback partial actions row: back-to-top link,
+// chapter links, kudos form, and the comments toggle.
+const FEEDBACK_FIXTURE = `
+<ul class="actions">
+  <li><a href="#main">↑ Top</a></li>
+  <li class="chapter previous"><a href="/works/999/chapters/101">← Previous Chapter</a></li>
+  <li class="chapter next"><a href="/works/999/chapters/103">Next Chapter →</a></li>
+  <li>
+    <form id="new_kudo" action="/kudos" method="post">
+      <input type="hidden" name="kudo[commentable_id]" value="999" />
+      <input type="submit" name="commit" value="Kudos ♥" id="kudo_submit" />
+    </form>
+  </li>
+  <li class="comments" id="show_comments_link_bottom"><a href="/works/999?show_comments=true#comments">Comments (42)</a></li>
+</ul>`;
+
+describe("collectFeedbackActions", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  function fixtureRow(): HTMLElement {
+    document.body.innerHTML = FEEDBACK_FIXTURE;
+
+    const row = document.querySelector<HTMLElement>("ul.actions");
+
+    if (!row) throw new Error("fixture failed to render");
+
+    return row;
+  }
+
+  it("adopts only the back-to-top link and the kudos form", () => {
+    const actions = collectFeedbackActions(fixtureRow());
+
+    expect(actions.map((action) => action.label)).toEqual([
+      "↑ Top",
+      "Kudos ♥",
+    ]);
+  });
+
+  it("proxies the kudos submit to the original input", () => {
+    const row = fixtureRow();
+    const actions = collectFeedbackActions(row);
+    const kudos = actions.find((action) => action.label === "Kudos ♥");
+
+    if (kudos?.kind !== "action") throw new Error("expected an action");
+
+    expect(kudos.href).toBeNull();
+
+    let clicked = false;
+    row
+      .querySelector<HTMLInputElement>("#kudo_submit")
+      ?.addEventListener("click", (event) => {
+        event.preventDefault();
+        clicked = true;
+      });
+    kudos.activate();
+
+    expect(clicked).toBe(true);
+  });
+
+  it("keeps the top link a hash-free button that fires the original", () => {
+    const row = fixtureRow();
+    const actions = collectFeedbackActions(row);
+    const top = actions.find((action) => action.label === "↑ Top");
+
+    if (top?.kind !== "action") throw new Error("expected an action");
+
+    expect(top.href).toBeNull();
+
+    let clicked = false;
+    row
+      .querySelector<HTMLAnchorElement>('a[href="#main"]')
+      ?.addEventListener("click", (event) => {
+        event.preventDefault();
+        clicked = true;
+      });
+    top.activate();
+
+    expect(clicked).toBe(true);
   });
 });

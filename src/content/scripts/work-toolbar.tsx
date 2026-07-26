@@ -18,7 +18,11 @@ import {
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { ContentScript } from "../content-script";
-import { collectNativeActions, type NativeAction } from "../native-actions";
+import {
+  collectFeedbackActions,
+  collectNativeActions,
+  type NativeAction,
+} from "../native-actions";
 import { createShadowHost } from "../shadow-host";
 import rtBaseStyles from "../styles/rt-base.css?inline";
 import workToolbarStyles from "../styles/work-toolbar.css?inline";
@@ -288,6 +292,7 @@ const WorkToolbarUI = ({
   workId,
   nav,
   initialActions,
+  extraActions,
   ignoreStore,
   progressStore,
   currentChapter,
@@ -298,6 +303,9 @@ const WorkToolbarUI = ({
   workId: string;
   nav: HTMLElement;
   initialActions: NativeAction[];
+  /** Instance-specific adoptions (bottom: kudos + back-to-top); kept
+   *  outside the nav re-collect so mutations don't drop them. */
+  extraActions: NativeAction[];
   /** Null hides the ignore section (setting off or status unavailable). */
   ignoreStore: ValueStore<boolean> | null;
   progressStore: ValueStore<WorkPageProgress> | null;
@@ -341,7 +349,7 @@ const WorkToolbarUI = ({
       <span class="rt-toolbar-brand" title="AO3 Toybox work toolbar">
         Toybox
       </span>
-      {nativeActions.map((action) => (
+      {[...nativeActions, ...extraActions].map((action) => (
         <NativeActionButton
           key={`${action.kind}-${action.label}`}
           action={action}
@@ -415,7 +423,10 @@ export default class WorkToolbar extends ContentScript {
       document.querySelector("dl.stats dd.chapters")?.textContent,
     );
 
-    const mountToolbar = (place: (host: HTMLElement) => void): void => {
+    const mountToolbar = (
+      place: (host: HTMLElement) => void,
+      extraActions: NativeAction[] = [],
+    ): void => {
       // Flow-root + clear keep the host below AO3's floated action lis —
       // overlapping them swallowed their hover/click events.
       const { host, root } = createShadowHost({
@@ -431,6 +442,7 @@ export default class WorkToolbar extends ContentScript {
           workId={workId}
           nav={navigation}
           initialActions={nativeActions}
+          extraActions={extraActions}
           ignoreStore={ignoreStore}
           progressStore={progressStore}
           currentChapter={currentChapter}
@@ -447,7 +459,7 @@ export default class WorkToolbar extends ContentScript {
       navParent.insertBefore(host, navigation.nextSibling);
     });
 
-    this.mountBottomToolbar(mountToolbar);
+    this.mountBottomToolbar(mountToolbar, nativeActions.length > 0);
 
     // Only after the replacement is live; a failed adoption leaves AO3's
     // own controls untouched.
@@ -495,9 +507,21 @@ export default class WorkToolbar extends ContentScript {
    * Second instance at the bottom of the chapter content: before AO3's
    * #feedback section (present even with comments disabled), after
    * #workskin as a fallback, skipped when neither exists.
+   *
+   * The feedback section's own actions row (↑ Top, chapter links, kudos,
+   * comments) would sit right under this instance and double its chapter
+   * and comments buttons, so its unique actions — kudos and back-to-top —
+   * are adopted into the toolbar and the native row is hidden. Only when
+   * the header adoption succeeded: the row's chapter/comments links are
+   * dupes of header actions, and hiding them without that coverage would
+   * lose navigation.
    */
   private mountBottomToolbar(
-    mountToolbar: (place: (host: HTMLElement) => void) => void,
+    mountToolbar: (
+      place: (host: HTMLElement) => void,
+      extraActions?: NativeAction[],
+    ) => void,
+    navAdopted: boolean,
   ): void {
     if (!this.settings.showBottomWorkToolbar) {
       return;
@@ -507,9 +531,26 @@ export default class WorkToolbar extends ContentScript {
     const feedbackParent = feedback?.parentNode;
 
     if (feedback && feedbackParent) {
+      let extraActions: NativeAction[] = [];
+      const nativeRow = navAdopted
+        ? feedback.querySelector<HTMLElement>(":scope > ul.actions")
+        : null;
+
+      if (nativeRow) {
+        try {
+          extraActions = collectFeedbackActions(nativeRow);
+        } catch (error) {
+          this.logger.error("Failed to adopt feedback actions", error);
+        }
+      }
+
       mountToolbar((host) => {
         feedbackParent.insertBefore(host, feedback);
-      });
+      }, extraActions);
+
+      if (nativeRow && extraActions.length > 0) {
+        nativeRow.style.setProperty("display", "none", "important");
+      }
 
       return;
     }
