@@ -20,6 +20,11 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { TTS_OPEN_EVENT } from "@src/common/tts/tts-settings";
 import { ContentScript } from "../content-script";
 import {
+  toolbarBadgeFor,
+  ToolbarIcon,
+  toolbarIconIdFor,
+} from "../toolbar-icons";
+import {
   collectFeedbackActions,
   collectNativeActions,
   type NativeAction,
@@ -49,20 +54,65 @@ function isPlainLeftClick(event: MouseEvent): boolean {
 }
 
 /**
+ * Compact-mode face of a control: recognized actions collapse to an
+ * icon (label becomes title/aria-label, comment counts survive as a
+ * small badge); unrecognized labels keep their text.
+ */
+const ActionFace = ({
+  label,
+  compact,
+}: {
+  label: string;
+  compact: boolean;
+}) => {
+  const iconId = compact ? toolbarIconIdFor(label) : null;
+
+  if (!iconId) {
+    return <>{label}</>;
+  }
+
+  const badge = toolbarBadgeFor(label);
+
+  return (
+    <>
+      <ToolbarIcon id={iconId} />
+      {badge !== null && <span class="rt-toolbar-badge">{badge}</span>}
+    </>
+  );
+};
+
+/** Props shared by icon-mode buttons so tooltips carry the lost label. */
+function compactAttrs(label: string, compact: boolean) {
+  const compacted = compact && toolbarIconIdFor(label) !== null;
+
+  return {
+    class: `rt-toolbar-btn${compacted ? " rt-icon-only" : ""}`,
+    title: compacted ? label : undefined,
+    "aria-label": compacted ? label : undefined,
+  };
+}
+
+/**
  * One adopted native control. Anchors keep their real href so middle/ctrl
  * click and copy-link work, but a plain left click activates the ORIGINAL
  * element so AO3's JS behaviors (share modal, inline comments, AJAX
  * forms) run exactly as before.
  */
-const NativeActionButton = ({ action }: { action: NativeAction }) => {
+const NativeActionButton = ({
+  action,
+  compact,
+}: {
+  action: NativeAction;
+  compact: boolean;
+}) => {
   if (action.kind === "menu") {
-    return <NativeMenu action={action} />;
+    return <NativeMenu action={action} compact={compact} />;
   }
 
   if (action.href) {
     return (
       <a
-        class="rt-toolbar-btn"
+        {...compactAttrs(action.label, compact)}
         href={action.href}
         onClick={(event) => {
           if (isPlainLeftClick(event)) {
@@ -71,22 +121,24 @@ const NativeActionButton = ({ action }: { action: NativeAction }) => {
           }
         }}
       >
-        {action.label}
+        <ActionFace label={action.label} compact={compact} />
       </a>
     );
   }
 
   return (
-    <button class="rt-toolbar-btn" onClick={action.activate}>
-      {action.label}
+    <button {...compactAttrs(action.label, compact)} onClick={action.activate}>
+      <ActionFace label={action.label} compact={compact} />
     </button>
   );
 };
 
 const NativeMenu = ({
   action,
+  compact,
 }: {
   action: Extract<NativeAction, { kind: "menu" }>;
+  compact: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLSpanElement>(null);
@@ -135,17 +187,20 @@ const NativeMenu = ({
     };
   }, [open]);
 
+  const attrs = compactAttrs(action.label, compact);
+
   return (
     <span class="rt-toolbar-menu" ref={wrapperRef}>
       <button
-        class={`rt-toolbar-btn${open ? " pressed" : ""}`}
+        {...attrs}
+        class={`${attrs.class}${open ? " pressed" : ""}`}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => {
           setOpen((previous) => !previous);
         }}
       >
-        {action.label} ▾
+        <ActionFace label={action.label} compact={compact} /> ▾
       </button>
       {open && (
         <div class="rt-toolbar-menu-panel" role="menu">
@@ -354,17 +409,23 @@ const WorkToolbarUI = ({
         <NativeActionButton
           key={`${action.kind}-${action.label}`}
           action={action}
+          compact={settings.compactWorkToolbar}
         />
       ))}
       {settings.enableTts && (
         <button
-          class="rt-toolbar-btn"
+          class={`rt-toolbar-btn${settings.compactWorkToolbar ? " rt-icon-only" : ""}`}
           title="Read this work aloud"
+          aria-label="Listen"
           onClick={() => {
             document.dispatchEvent(new CustomEvent(TTS_OPEN_EVENT));
           }}
         >
-          🎧 Listen
+          {settings.compactWorkToolbar ? (
+            <ToolbarIcon id="headphones" />
+          ) : (
+            "🎧 Listen"
+          )}
         </button>
       )}
       <span class="rt-toolbar-spacer" />

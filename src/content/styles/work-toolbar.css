@@ -79,6 +79,27 @@
   font-weight: 600;
 }
 
+/* Compact mode: recognized actions collapse to icons; the label lives
+   in title/aria-label */
+
+.rt-toolbar-btn.rt-icon-only {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+}
+
+.rt-toolbar-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.rt-toolbar-badge {
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
 .rt-toolbar-spacer {
   flex: 1;
 }

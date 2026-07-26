@@ -190,6 +190,12 @@ const pickAccent = (accent: string) => {
   <!-- Accent swatches -->
   <div class="px-4 py-2.5 border-t border-surface-800">
     <span class="block text-sm font-medium mb-2">Accent color</span>
+    <p
+      v-if="settings && !settings.ao3ThemeEnabled"
+      class="text-[11px] text-gray-500 leading-snug mb-2"
+    >
+      Turn on the AO3 theme above to pick palettes and accent colors.
+    </p>
     <div class="grid grid-cols-4 gap-2" role="group" aria-label="Accent color">
       <button
         v-for="profile in activeAccents"

@@ -33,6 +33,7 @@ export type Settings = {
   showChapterProgress: boolean; // Show reading progress + reset control on work pages
   showIgnoreControl: boolean; // Show ignore/un-ignore toggle on work pages
   showBottomWorkToolbar: boolean; // Repeat the work toolbar below the chapter content
+  compactWorkToolbar: boolean; // Render recognized toolbar actions as icons instead of text
   trackReadingPosition: boolean; // Save how far into a chapter you scrolled
   showResumePrompt: boolean; // Offer to jump back to the saved reading position
 
@@ -123,6 +124,7 @@ export const defaultSettings: Settings = {
   showChapterProgress: true,
   showIgnoreControl: true,
   showBottomWorkToolbar: true,
+  compactWorkToolbar: true,
   trackReadingPosition: true,
   showResumePrompt: true,
 
